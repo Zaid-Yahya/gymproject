@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Discount;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -11,7 +12,8 @@ class SubscriptionController extends Controller
     public function index()
     {
         return Inertia::render('Subscriptions/Index', [
-            'subscriptions' => auth()->user()->subscriptions()->with('payments')->latest()->get(),
+            'subscriptions' => auth()->user()->subscriptions()->with(['payments', 'discount'])->latest()->get(),
+            'hasActiveSubscription' => auth()->user()->subscriptions()->where('status', 'active')->exists(),
         ]);
     }
 
@@ -20,41 +22,51 @@ class SubscriptionController extends Controller
         $plans = [
             [
                 'name' => 'Basic',
-                'price' => 299,
-                'duration' => '1 month',
+                'price' => 49,
+                'period' => 'monthly',
                 'features' => [
-                    'Access to gym equipment',
+                    'Access during off-peak hours',
                     'Basic fitness assessment',
-                    'Locker room access',
+                    'Standard locker access',
+                    'Online workout resources',
                 ],
+                'popular' => false,
             ],
             [
                 'name' => 'Premium',
-                'price' => 499,
-                'duration' => '1 month',
+                'price' => 89,
+                'period' => 'monthly',
                 'features' => [
-                    'All Basic features',
-                    'Group classes included',
-                    'Personal trainer (2 sessions)',
-                    'Nutrition consultation',
+                    '24/7 unlimited access',
+                    'All group classes included',
+                    'Monthly fitness assessment',
+                    'One personal training session/month',
+                    'Premium locker with amenities',
                 ],
+                'popular' => true,
             ],
             [
                 'name' => 'Elite',
-                'price' => 799,
-                'duration' => '1 month',
+                'price' => 149,
+                'period' => 'monthly',
                 'features' => [
                     'All Premium features',
-                    'Unlimited personal training',
-                    'Premium locker',
-                    'Spa access',
-                    'Nutrition plan',
+                    'Weekly personal training',
+                    'Customized nutrition plan',
+                    'Priority class booking',
+                    'Exclusive member events',
+                    'Partner gym access',
                 ],
+                'popular' => false,
             ],
         ];
 
+        // Check if the user already has an active subscription
+        $hasActiveSubscription = auth()->user()->subscriptions()->where('status', 'active')->exists();
+
         return Inertia::render('Subscriptions/Plans', [
             'plans' => $plans,
+            'hasActiveSubscription' => $hasActiveSubscription,
         ]);
     }
 
@@ -62,16 +74,29 @@ class SubscriptionController extends Controller
     {
         $request->validate([
             'plan_name' => 'required|string',
+            'original_price' => 'required|numeric',
             'price' => 'required|numeric',
+            'discount_id' => 'nullable|exists:discounts,id',
         ]);
 
+        // Create the subscription
         $subscription = auth()->user()->subscriptions()->create([
             'plan_name' => $request->plan_name,
+            'original_price' => $request->original_price,
             'price' => $request->price,
+            'discount_id' => $request->discount_id,
             'start_date' => now(),
             'end_date' => now()->addMonth(),
             'status' => 'pending',
         ]);
+
+        // If we have a discount, increment its used count
+        if ($request->discount_id) {
+            $discount = Discount::find($request->discount_id);
+            if ($discount) {
+                $discount->increment('used_count');
+            }
+        }
 
         return redirect()->route('payment.process', $subscription->id);
     }
@@ -87,5 +112,28 @@ class SubscriptionController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Subscription cancelled successfully.');
+    }
+
+    public function renew(Subscription $subscription)
+    {
+        if ($subscription->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        if ($subscription->status !== 'active') {
+            return redirect()->back()->with('error', 'Only active subscriptions can be renewed.');
+        }
+
+        // Create a new pending subscription
+        $newSubscription = auth()->user()->subscriptions()->create([
+            'plan_name' => $subscription->plan_name,
+            'original_price' => $subscription->original_price,
+            'price' => $subscription->original_price, // No discount for renewal by default
+            'start_date' => $subscription->end_date,
+            'end_date' => $subscription->end_date->copy()->addMonth(),
+            'status' => 'pending',
+        ]);
+
+        return redirect()->route('payment.process', $newSubscription->id);
     }
 } 

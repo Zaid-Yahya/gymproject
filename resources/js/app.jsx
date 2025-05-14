@@ -4,6 +4,8 @@ import './bootstrap';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
+import React from 'react';
+import { AnimatePresence } from 'framer-motion';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -17,9 +19,16 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        root.render(<App {...props} />);
+        root.render(
+            <AnimatePresence mode="wait" initial={false}>
+                <App {...props} />
+            </AnimatePresence>
+        );
     },
     progress: {
-        color: '#4B5563',
+        color: '#ef4444', // Using the red theme color
+        delay: 250,
+        includeCSS: true,
+        showSpinner: true,
     },
 });

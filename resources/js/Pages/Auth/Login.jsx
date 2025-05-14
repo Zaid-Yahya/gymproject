@@ -288,9 +288,9 @@ export default function Login({ status, canResetPassword }) {
                                 {canResetPassword && (
                                     <Link
                                         href={route('password.request')}
-                                        className="text-sm text-gray-600 hover:text-gray-900"
+                                        className="text-sm text-red-500 hover:text-red-600 hover:underline transition duration-200"
                                     >
-                                        Forgot password
+                                        Forgot password?
                                     </Link>
                                 )}
                             </div>

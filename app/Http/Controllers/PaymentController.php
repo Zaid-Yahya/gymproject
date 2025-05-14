@@ -22,9 +22,37 @@ class PaymentController extends Controller
             abort(403);
         }
 
+        // Only allow processing payments for pending subscriptions
+        if ($subscription->status !== 'pending') {
+            return redirect()->route('subscriptions.index')
+                ->with('error', 'This subscription is already processed.');
+        }
+
+        // Get available payment methods
+        $paymentMethods = [
+            [
+                'id' => 'credit_card',
+                'name' => 'Credit Card',
+                'icon' => 'credit-card',
+                'description' => 'Pay with Visa, Mastercard, or American Express',
+            ],
+            [
+                'id' => 'paypal',
+                'name' => 'PayPal',
+                'icon' => 'paypal',
+                'description' => 'Fast and secure payment with PayPal',
+            ],
+            [
+                'id' => 'bank_transfer',
+                'name' => 'Bank Transfer',
+                'icon' => 'bank',
+                'description' => 'Direct transfer from your bank account',
+            ],
+        ];
+
         return Inertia::render('Payments/Process', [
-            'subscription' => $subscription,
-            'intent' => auth()->user()->createSetupIntent(),
+            'subscription' => $subscription->load('discount'),
+            'paymentMethods' => $paymentMethods,
         ]);
     }
 
@@ -34,27 +62,42 @@ class PaymentController extends Controller
             abort(403);
         }
 
+        if ($subscription->status !== 'pending') {
+            return redirect()->route('subscriptions.index')
+                ->with('error', 'This subscription is already processed.');
+        }
+
         $request->validate([
             'payment_method' => 'required|string',
+            'card_number' => 'required_if:payment_method,credit_card',
+            'card_expiry' => 'required_if:payment_method,credit_card',
+            'card_cvc' => 'required_if:payment_method,credit_card',
         ]);
 
         try {
-            // Process payment with Stripe (you'll need to set up Stripe integration)
+            // This is a simulated payment process (no real payment gateway)
+            // In a real application, you would integrate with Stripe, PayPal, etc.
+            
+            // Generate a fake transaction ID for demo purposes
+            $transactionId = 'TRANS_' . uniqid() . '_' . strtoupper(substr(md5($subscription->id . time()), 0, 8));
+            
+            // Create the payment record
             $payment = $subscription->payments()->create([
                 'user_id' => auth()->id(),
                 'amount' => $subscription->price,
                 'payment_method' => $request->payment_method,
                 'status' => 'completed',
-                'transaction_id' => 'test_' . uniqid(), // Replace with actual Stripe transaction ID
+                'transaction_id' => $transactionId,
             ]);
 
+            // Activate the subscription
             $subscription->update(['status' => 'active']);
 
             return redirect()->route('subscriptions.index')
-                ->with('success', 'Payment processed successfully.');
+                ->with('success', 'Payment processed successfully! Your subscription is now active.');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Payment failed. Please try again.');
+                ->with('error', 'Payment failed. Please try again or contact support.');
         }
     }
 } 

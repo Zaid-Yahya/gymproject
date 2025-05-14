@@ -11,7 +11,9 @@ class Subscription extends Model
 
     protected $fillable = [
         'user_id',
+        'discount_id',
         'plan_name',
+        'original_price',
         'price',
         'start_date',
         'end_date',
@@ -33,8 +35,31 @@ class Subscription extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function discount()
+    {
+        return $this->belongsTo(Discount::class);
+    }
+
     public function isActive()
     {
         return $this->status === 'active' && $this->end_date->isFuture();
+    }
+
+    public function calculateRemainingDays()
+    {
+        if (!$this->isActive()) {
+            return 0;
+        }
+
+        return now()->diffInDays($this->end_date, false);
+    }
+
+    public function getSavingsAttribute()
+    {
+        if (!$this->discount_id) {
+            return 0;
+        }
+
+        return $this->original_price - $this->price;
     }
 } 

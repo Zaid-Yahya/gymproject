@@ -1,24 +1,35 @@
 import React from 'react';
-import { Head } from '@inertiajs/react';
-import { Link } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 
-export default function Index({ subscriptions }) {
-    const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+export default function Index({ subscriptions, hasActiveSubscription }) {
+    const { post, processing } = useForm();
+
+    const handleCancel = (id) => {
+        if (confirm('Are you sure you want to cancel this subscription? This action cannot be undone.')) {
+            post(route('subscriptions.cancel', id));
+        }
     };
 
-    const getStatusColor = (status) => {
+    const handleRenew = (id) => {
+        post(route('subscriptions.renew', id));
+    };
+
+    const formatDate = (dateString) => {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+    };
+
+    const getStatusBadgeClass = (status) => {
         switch (status) {
             case 'active':
                 return 'bg-green-100 text-green-800';
-            case 'cancelled':
-                return 'bg-red-100 text-red-800';
             case 'pending':
                 return 'bg-yellow-100 text-yellow-800';
+            case 'cancelled':
+                return 'bg-red-100 text-red-800';
+            case 'expired':
+                return 'bg-gray-100 text-gray-800';
             default:
                 return 'bg-gray-100 text-gray-800';
         }
@@ -28,92 +39,120 @@ export default function Index({ subscriptions }) {
         <>
             <Head title="My Subscriptions" />
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div className="py-12 bg-gray-100 min-h-screen">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold text-gray-900">My Subscriptions</h2>
+                        
                         <Link
                             href={route('subscriptions.plans')}
-                            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-200"
+                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                         >
+                            <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                            </svg>
                             New Subscription
                         </Link>
                     </div>
 
                     {subscriptions.length === 0 ? (
-                        <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-                            <p className="text-gray-500">You don't have any subscriptions yet.</p>
+                        <div className="bg-white shadow rounded-lg p-6 text-center">
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">No subscriptions yet</h3>
+                            <p className="text-gray-500 mb-4">You don't have any subscriptions at the moment.</p>
                             <Link
                                 href={route('subscriptions.plans')}
-                                className="text-red-600 hover:text-red-700 mt-2 inline-block"
+                                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none"
                             >
-                                Browse our plans
+                                Browse Plans
                             </Link>
                         </div>
                     ) : (
-                        <div className="bg-white overflow-hidden shadow-sm rounded-lg">
-                            <div className="p-6">
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-gray-200">
-                                        <thead>
-                                            <tr>
-                                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Plan
-                                                </th>
-                                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Status
-                                                </th>
-                                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Start Date
-                                                </th>
-                                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    End Date
-                                                </th>
-                                                <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Price
-                                                </th>
-                                                <th className="px-6 py-3 bg-gray-50"></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white divide-y divide-gray-200">
-                                            {subscriptions.map((subscription) => (
-                                                <tr key={subscription.id}>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-sm font-medium text-gray-900">
-                                                            {subscription.plan_name}
+                        <div className="bg-white shadow overflow-hidden rounded-lg">
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Plan
+                                            </th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Status
+                                            </th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Period
+                                            </th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Price
+                                            </th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {subscriptions.map((subscription) => (
+                                            <tr key={subscription.id}>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                        {subscription.plan_name}
+                                                    </div>
+                                                    {subscription.discount && (
+                                                        <div className="text-xs text-green-600">
+                                                            Discount applied: {subscription.discount.name}
                                                         </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(subscription.status)}`}>
-                                                            {subscription.status}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        {formatDate(subscription.start_date)}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        {formatDate(subscription.end_date)}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                        {subscription.price} MAD
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(subscription.status)}`}>
+                                                        {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    <div>From: {formatDate(subscription.start_date)}</div>
+                                                    <div>To: {formatDate(subscription.end_date)}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    {subscription.discount ? (
+                                                        <div>
+                                                            <div className="text-sm font-medium text-gray-900">${subscription.price}</div>
+                                                            <div className="text-xs text-gray-500 line-through">${subscription.original_price}</div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-sm font-medium text-gray-900">${subscription.price}</div>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    <div className="flex space-x-2">
                                                         {subscription.status === 'active' && (
-                                                            <Link
-                                                                href={route('subscriptions.cancel', subscription.id)}
-                                                                method="post"
-                                                                as="button"
-                                                                className="text-red-600 hover:text-red-900"
+                                                            <button
+                                                                onClick={() => handleRenew(subscription.id)}
+                                                                disabled={processing}
+                                                                className="text-indigo-600 hover:text-indigo-900 disabled:opacity-50"
+                                                            >
+                                                                Renew
+                                                            </button>
+                                                        )}
+                                                        {(subscription.status === 'active' || subscription.status === 'pending') && (
+                                                            <button
+                                                                onClick={() => handleCancel(subscription.id)}
+                                                                disabled={processing}
+                                                                className="text-red-600 hover:text-red-900 disabled:opacity-50"
                                                             >
                                                                 Cancel
-                                                            </Link>
+                                                            </button>
                                                         )}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                        <Link
+                                                            href={route('payments.index')}
+                                                            className="text-blue-600 hover:text-blue-900"
+                                                        >
+                                                            View Payments
+                                                        </Link>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     )}
