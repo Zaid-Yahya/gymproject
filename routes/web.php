@@ -4,12 +4,22 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\CommentController;
+use App\Models\Comment;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Home');
+    $comments = Comment::with('user')
+        ->where('is_approved', true)
+        ->latest()
+        ->take(10)
+        ->get();
+
+    return Inertia::render('Home', [
+        'comments' => $comments
+    ]);
 })->name('home');
 
 Route::get('/dashboard', function () {
@@ -45,6 +55,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin routes
     Route::get('/admin', [App\Http\Controllers\AdminController::class, 'index'])->name('admin.index');
+
+    // Comment routes
+    Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::post('/comments/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve')->middleware('admin');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy')->middleware('admin');
 });
 
 Route::get('/bmi-calculator', function () {
