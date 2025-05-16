@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Navbar from '@/Components/Navbar';
 
 const BmiCalculator = () => {
     const [height, setHeight] = useState('');
@@ -11,7 +12,7 @@ const BmiCalculator = () => {
     const [bmiCategory, setBmiCategory] = useState('');
     const [showResult, setShowResult] = useState(false);
     const [isMetric, setIsMetric] = useState(true);
-    const [navVisible, setNavVisible] = useState(false);
+    const [activeSection, setActiveSection] = useState('bmi');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [showNotification, setShowNotification] = useState(false);
     const [showInformation, setShowInformation] = useState(false);
@@ -19,13 +20,7 @@ const BmiCalculator = () => {
     const [isAnimating, setIsAnimating] = useState(true);
     const animationRef = useRef(null);
     const [direction, setDirection] = useState(1);
-    const canvasRef = useRef(null);
-    const animationFrameRef = useRef(null);
-    const particlesRef = useRef([]);
     
-    // Fixed theme - only red
-    const theme = { primary: '#ef4444', secondary: '#fee2e2', tertiary: '#fecaca' };
-
     // Animation for the BMI pointer
     useEffect(() => {
         const animate = () => {
@@ -62,90 +57,6 @@ const BmiCalculator = () => {
             }
         };
     }, [bmi, direction]);
-
-    // Handle navigation visibility on scroll
-    useEffect(() => {
-        const handleScroll = () => {
-            setNavVisible(window.scrollY > 100);
-        };
-        
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-
-    // New simplified background animation
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        const circles = [];
-        const circleCount = 15;
-
-        const resizeCanvas = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        };
-
-        class Circle {
-            constructor() {
-                this.reset();
-            }
-
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 50 + 20;
-                this.alpha = Math.random() * 0.2;
-                this.speed = Math.random() * 0.5 + 0.1;
-                this.color = `rgba(239, 68, 68, ${this.alpha})`;
-            }
-
-            update() {
-                this.y -= this.speed;
-                this.x += Math.sin(this.y * 0.01) * 0.5;
-
-                if (this.y + this.size < 0) {
-                    this.y = canvas.height + this.size;
-                    this.x = Math.random() * canvas.width;
-                }
-            }
-
-            draw() {
-            ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-            ctx.fill();
-            }
-        }
-
-        const createCircles = () => {
-            for (let i = 0; i < circleCount; i++) {
-                circles.push(new Circle());
-            }
-        };
-
-        const animate = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            circles.forEach(circle => {
-                circle.update();
-                circle.draw();
-            });
-
-            requestAnimationFrame(animate);
-        };
-
-        resizeCanvas();
-        createCircles();
-        animate();
-
-        window.addEventListener('resize', resizeCanvas);
-
-        return () => {
-            window.removeEventListener('resize', resizeCanvas);
-        };
-    }, []);
 
     const calculateBMI = (e) => {
         e.preventDefault();
@@ -268,113 +179,54 @@ const BmiCalculator = () => {
     // Update the button styles in the form section
     const buttonStyle = {
         base: `relative overflow-hidden p-4 rounded-lg transition-all duration-300 border`,
-        active: `bg-gradient-to-r from-red-500 to-red-600 text-white shadow-sm border-transparent`,
+        active: `bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-sm border-transparent`,
         inactive: `bg-white text-gray-600 hover:bg-gray-50 border-gray-200`
     };
 
     return (
         <>
-            <Head title="BMI Calculator - POWER GYM" />
+            <Head title="Calculateur d'IMC - POWER GYM" />
 
-            {/* Add background gradient */}
-            <div className="fixed inset-0 bg-gradient-to-br from-red-50 via-white to-red-100 -z-10" />
+            {/* Simple Background with Deep Orange Color */}
+            <div className="fixed inset-0 -z-10 overflow-hidden">
+                {/* Main deep orange background */}
+                <div className="absolute inset-0 bg-gradient-to-b from-orange-600 to-orange-500 opacity-30"></div>
+                
+                {/* Simple animated gradient */}
+                <motion.div 
+                    className="absolute inset-0"
+                    animate={{
+                        opacity: [0.4, 0.5, 0.4],
+                    }}
+                    transition={{
+                        duration: 8,
+                        repeat: Infinity,
+                        repeatType: "mirror",
+                        ease: "easeInOut"
+                    }}
+                    style={{
+                        backgroundImage: 'linear-gradient(120deg, rgba(234, 88, 12, 0.5) 0%, rgba(251, 146, 60, 0.3) 100%)'
+                    }}
+                />
+                
+                {/* Single simple floating orb */}
+                <motion.div
+                    className="absolute w-full h-full bg-gradient-to-br from-orange-600/10 to-orange-400/10 blur-3xl"
+                    animate={{
+                        scale: [1, 1.05, 1],
+                    }}
+                    transition={{
+                        duration: 15,
+                        repeat: Infinity,
+                        repeatType: 'mirror',
+                        ease: 'easeInOut'
+                    }}
+                />
+            </div>
 
-            {/* Navigation Bar */}
-            <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${navVisible ? 'bg-white shadow-lg' : 'bg-white/80 backdrop-blur-sm shadow-sm'}`}>
-                <div className="container mx-auto px-6">
-                    <div className="flex justify-between items-center py-4">
-                        {/* Logo */}
-                        <Link href={route('home')} className="text-2xl font-extrabold">
-                            <span className="text-red-500">POWER</span>
-                            <span className="text-gray-800">GYM</span>
-                        </Link>
-                        
-                        {/* Desktop Navigation */}
-                        <div className="hidden md:flex space-x-8">
-                            <Link 
-                                href={route('home')}
-                                className="text-sm font-medium text-gray-600 hover:text-red-500 transition-all duration-300"
-                            >
-                                HOME
-                            </Link>
-                            <Link 
-                                href={route('bmi.calculator')}
-                                className="text-sm font-medium text-red-500"
-                            >
-                                BMI CALCULATOR
-                            </Link>
-                        </div>
-                        
-                        {/* Authentication Links */}
-                        <div className="hidden md:flex items-center space-x-4">
-                            <Link 
-                                href={route('login')} 
-                                className="px-4 py-2 text-gray-600 hover:text-red-500 transition-all duration-300"
-                            >
-                                Login
-                            </Link>
-                            <Link 
-                                href={route('register')} 
-                                className="px-6 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-300 hover:scale-105 transform shadow-md hover:shadow-lg"
-                            >
-                                Join Now
-                            </Link>
-                        </div>
-                        
-                        {/* Mobile menu button */}
-                        <button 
-                            className="md:hidden text-gray-600"
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-                            </svg>
-                        </button>
-                    </div>
-                    
-                    {/* Mobile menu */}
-                    <AnimatePresence>
-                        {mobileMenuOpen && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                className="md:hidden bg-white rounded-lg shadow-lg mt-2 overflow-hidden"
-                            >
-                                <div className="px-4 py-6 space-y-4">
-                                    <Link 
-                                        href={route('home')}
-                                        className="block text-gray-600 hover:text-red-500 transition-all duration-300"
-                                    >
-                                        HOME
-                                    </Link>
-                                    <Link 
-                                        href={route('bmi.calculator')}
-                                        className="block text-red-500"
-                                    >
-                                        BMI CALCULATOR
-                                    </Link>
-                                    <div className="pt-4 space-y-2">
-                                        <Link 
-                                            href={route('login')} 
-                                            className="block text-gray-600 hover:text-red-500 transition-all duration-300"
-                                        >
-                                            Login
-                                        </Link>
-                                        <Link 
-                                            href={route('register')} 
-                                            className="block px-6 py-2 bg-red-500 text-white text-center rounded-full hover:bg-red-600 transition-all duration-300"
-                                        >
-                                            Join Now
-                                        </Link>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            </nav>
-            
+            {/* Import Navbar from Home page */}
+            <Navbar activeSection={activeSection} />
+
             {/* Floating Notification */}
             <AnimatePresence>
                 {showNotification && (
@@ -393,7 +245,7 @@ const BmiCalculator = () => {
                                 )}
                             </div>
                             <div>
-                                <p className="font-medium text-gray-900">Your BMI: {bmi}</p>
+                                <p className="font-medium text-gray-900">Votre IMC: {bmi}</p>
                                 <p className="text-sm text-gray-600">{bmiCategory}</p>
                             </div>
                         </div>
@@ -404,16 +256,92 @@ const BmiCalculator = () => {
             {/* Main Content */}
             <div className="min-h-screen pt-32 pb-20 relative">
                 <div className="container mx-auto px-4">
+                    {/* Introduction Section */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="max-w-5xl mx-auto mb-16"
+                    >
+                        <div className="text-center mb-10">
+                            <h1 className="text-4xl md:text-5xl font-bold text-orange-600 mb-4">
+                                Indice de Masse Corporelle
+                            </h1>
+                            <p className="text-xl text-orange-500 max-w-3xl mx-auto">
+                                Comprendre la composition de votre corps pour une meilleure gestion de votre santé
+                            </p>
+                        </div>
+                        
+                        <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-8 shadow-lg border border-orange-200">
+                            <div className="flex flex-col md:flex-row gap-8">
+                                <div className="md:w-1/2">
+                                    <h2 className="text-2xl font-bold text-orange-700 mb-4">Qu'est-ce que l'IMC ?</h2>
+                                    <p className="text-gray-700 mb-4">
+                                        L'Indice de Masse Corporelle (IMC) est une valeur numérique dérivée du poids et de la taille d'une personne. 
+                                        Il fournit un moyen simple et rapide d'évaluer si une personne a un poids corporel sain par rapport à sa taille.
+                                    </p>
+                                    <p className="text-gray-700 mb-4">
+                                        Bien que l'IMC ne mesure pas directement la graisse corporelle, il sert d'outil de dépistage utile pour 
+                                        identifier les problèmes de poids potentiels qui pourraient mener à des problèmes de santé.
+                                    </p>
+                                    <div className="mt-6 flex items-center bg-white p-4 rounded-lg shadow-sm border border-orange-100">
+                                        <div className="mr-4 bg-orange-100 p-3 rounded-full">
+                                            <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <p className="text-sm text-gray-700">
+                                            L'IMC est calculé en divisant le poids en kilogrammes par le carré de la taille en mètres.
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div className="md:w-1/2">
+                                    <h2 className="text-2xl font-bold text-orange-700 mb-4">Catégories d'IMC</h2>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                            <div className="w-16 h-1 bg-blue-500 rounded-full mr-3"></div>
+                                            <div>
+                                                <p className="font-medium text-gray-800">Insuffisance pondérale</p>
+                                                <p className="text-sm text-gray-600">Inférieur à 18,5</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center p-3 bg-green-50 rounded-lg border border-green-100">
+                                            <div className="w-16 h-1 bg-green-500 rounded-full mr-3"></div>
+                                            <div>
+                                                <p className="font-medium text-gray-800">Poids normal</p>
+                                                <p className="text-sm text-gray-600">18,5 - 24,9</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+                                            <div className="w-16 h-1 bg-yellow-500 rounded-full mr-3"></div>
+                                            <div>
+                                                <p className="font-medium text-gray-800">Surpoids</p>
+                                                <p className="text-sm text-gray-600">25,0 - 29,9</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center p-3 bg-red-50 rounded-lg border border-red-100">
+                                            <div className="w-16 h-1 bg-red-500 rounded-full mr-3"></div>
+                                            <div>
+                                                <p className="font-medium text-gray-800">Obésité</p>
+                                                <p className="text-sm text-gray-600">30,0 et plus</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-center mb-12"
                     >
-                        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                            Calculate Your BMI
+                        <h1 className="text-4xl md:text-5xl font-bold text-orange-600 mb-4">
+                            Calculez Votre IMC
                         </h1>
-                        <p className="text-xl text-gray-600">
-                            Track your fitness progress with our BMI calculator
+                        <p className="text-xl text-orange-500">
+                            Suivez votre progression fitness avec notre calculateur d'IMC
                         </p>
                     </motion.div>
 
@@ -423,9 +351,9 @@ const BmiCalculator = () => {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="bg-white rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-red-100/50 backdrop-blur-sm"
+                            className="rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-orange-200 backdrop-blur-sm"
                             style={{ 
-                                background: 'linear-gradient(to bottom right, rgba(255,255,255,0.9), rgba(255,255,255,0.95))'
+                                background: 'linear-gradient(to bottom right, rgba(255, 237, 213, 0.9), rgba(254, 215, 170, 0.85))'
                             }}
                         >
                             <form onSubmit={calculateBMI} className="space-y-6">
@@ -436,28 +364,28 @@ const BmiCalculator = () => {
                                         onClick={() => setIsMetric(true)}
                                         className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
                                             isMetric 
-                                                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-sm'
+                                                ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-sm'
                                                 : 'bg-white text-gray-600 hover:bg-gray-50'
                                         }`}
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                                         </svg>
-                                        <span>Metric</span>
+                                        <span>Métrique</span>
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setIsMetric(false)}
                                         className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
                                             !isMetric 
-                                                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-sm'
+                                                ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-sm'
                                                 : 'bg-white text-gray-600 hover:bg-gray-50'
                                         }`}
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                                         </svg>
-                                        <span>Imperial</span>
+                                        <span>Impérial</span>
                                     </button>
                                 </div>
 
@@ -472,7 +400,7 @@ const BmiCalculator = () => {
                                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
-                                            <span className="font-medium">Male</span>
+                                            <span className="font-medium">Homme</span>
                                         </div>
                                     </button>
                                     <button
@@ -484,7 +412,7 @@ const BmiCalculator = () => {
                                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
-                                            <span className="font-medium">Female</span>
+                                            <span className="font-medium">Femme</span>
                                         </div>
                                     </button>
                                 </div>
@@ -497,7 +425,7 @@ const BmiCalculator = () => {
                                                 <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                 </svg>
-                                                <span>Age</span>
+                                                <span>Âge</span>
                                             </div>
                                         </label>
                                         <div className="relative">
@@ -505,12 +433,12 @@ const BmiCalculator = () => {
                                                 type="number"
                                                 value={age}
                                                 onChange={(e) => setAge(e.target.value)}
-                                                className="w-full bg-gray-50 rounded-lg pl-3 pr-10 py-2 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-300"
-                                                placeholder="Enter age"
+                                                className="w-full bg-gray-50 rounded-lg pl-3 pr-10 py-2 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300"
+                                                placeholder="Entrez votre âge"
                                                 required
                                             />
                                             <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
-                                                yrs
+                                                ans
                                             </span>
                                         </div>
                                     </div>
@@ -520,7 +448,7 @@ const BmiCalculator = () => {
                                                 <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
                                                 </svg>
-                                                <span>Height</span>
+                                                <span>Taille</span>
                                             </div>
                                         </label>
                                         <div className="relative">
@@ -528,8 +456,8 @@ const BmiCalculator = () => {
                                                 type="number"
                                                 value={height}
                                                 onChange={(e) => setHeight(e.target.value)}
-                                                className="w-full bg-gray-50 rounded-lg pl-3 pr-10 py-2 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-300"
-                                                placeholder="Enter height"
+                                                className="w-full bg-gray-50 rounded-lg pl-3 pr-10 py-2 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300"
+                                                placeholder="Entrez votre taille"
                                                 required
                                             />
                                             <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
@@ -543,7 +471,7 @@ const BmiCalculator = () => {
                                                 <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                                                 </svg>
-                                                <span>Weight</span>
+                                                <span>Poids</span>
                                             </div>
                                         </label>
                                         <div className="relative">
@@ -551,8 +479,8 @@ const BmiCalculator = () => {
                                                 type="number"
                                                 value={weight}
                                                 onChange={(e) => setWeight(e.target.value)}
-                                                className="w-full bg-gray-50 rounded-lg pl-3 pr-10 py-2 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-300"
-                                                placeholder="Enter weight"
+                                                className="w-full bg-gray-50 rounded-lg pl-3 pr-10 py-2 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-300"
+                                                placeholder="Entrez votre poids"
                                                 required
                                             />
                                             <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
@@ -565,12 +493,12 @@ const BmiCalculator = () => {
                                 <div className="flex space-x-3">
                                     <button
                                         type="submit"
-                                        className="flex-1 max-w-[300px] mx-auto flex items-center justify-center space-x-2 bg-gradient-to-r from-red-500 to-red-600 text-white py-2.5 rounded-lg font-medium text-sm transition-all duration-300 hover:shadow-md active:scale-[0.98]"
+                                        className="flex-1 max-w-[300px] mx-auto flex items-center justify-center space-x-2 bg-gradient-to-r from-orange-500 to-red-500 text-white py-2.5 rounded-lg font-medium text-sm transition-all duration-300 hover:shadow-md active:scale-[0.98]"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                         </svg>
-                                        <span>Calculate BMI</span>
+                                        <span>Calculer l'IMC</span>
                                     </button>
                                     <button
                                         type="button"
@@ -590,9 +518,9 @@ const BmiCalculator = () => {
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="bg-white rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-red-100/50 backdrop-blur-sm"
+                            className="rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-orange-200 backdrop-blur-sm"
                             style={{ 
-                                background: 'linear-gradient(to bottom right, rgba(255,255,255,0.9), rgba(255,255,255,0.95))'
+                                background: 'linear-gradient(to bottom right, rgba(255, 237, 213, 0.9), rgba(254, 215, 170, 0.85))'
                             }}
                         >
                             <AnimatePresence mode="wait">
@@ -608,7 +536,7 @@ const BmiCalculator = () => {
                                             {bmi && (
                                                 <button
                                                     onClick={() => setShowInformation(true)}
-                                                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                                    className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300"
                                                 >
                                                     Voir les informations
                                                 </button>
@@ -766,13 +694,6 @@ const BmiCalculator = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Background Animation Canvas */}
-            <canvas
-                ref={canvasRef}
-                className="fixed inset-0 w-full h-full pointer-events-none"
-                style={{ zIndex: -1 }}
-            />
         </>
     );
 };
