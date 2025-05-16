@@ -1603,7 +1603,7 @@ export default function Home({ comments: initialComments, auth }) {
                     </div>
                 </section>
 
-                {/* AVIS Section - Redesigned to match reference image with different colors */}
+{/* AVIS Section - Redesigned to match reference image with different colors */}
                 <section className="py-16 bg-gradient-to-b from-white to-orange-50">
                     <div className="container mx-auto px-6">
                         <div className="text-center mb-10">
@@ -1775,6 +1775,129 @@ export default function Home({ comments: initialComments, auth }) {
                     </div>
                 </section>
                 
+                {/* Horaires Section - Compact version with matching background */}
+                <section className="py-12 bg-gradient-to-b from-gray-900 to-black relative overflow-hidden">
+                    {/* Background elements */}
+                    <div className="absolute top-0 right-0 w-full h-full overflow-hidden opacity-15">
+                        <svg className="absolute top-0 right-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="gridGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#f97316" stopOpacity="0.3" />
+                                    <stop offset="100%" stopColor="#ef4444" stopOpacity="0.3" />
+                                </linearGradient>
+                            </defs>
+                            {Array.from({ length: 10 }).map((_, i) => (
+                                <line key={`h-${i}`} x1="0" y1={i * 10} x2="100" y2={i * 10} stroke="url(#gridGradient)" strokeWidth="0.2" />
+                            ))}
+                            {Array.from({ length: 10 }).map((_, i) => (
+                                <line key={`v-${i}`} x1={i * 10} y1="0" x2={i * 10} y2="100" stroke="url(#gridGradient)" strokeWidth="0.2" />
+                            ))}
+                        </svg>
+                    </div>
+                    
+                    <motion.div 
+                        className="absolute -bottom-8 -left-8 w-32 h-32 bg-orange-600 rounded-full opacity-15 blur-3xl"
+                        animate={{ 
+                            scale: [1, 1.2, 1],
+                            opacity: [0.15, 0.25, 0.15]
+                        }}
+                        transition={{
+                            duration: 8,
+                            repeat: Infinity,
+                            repeatType: "reverse"
+                        }}
+                    />
+                    
+                    <div className="container mx-auto px-6 relative z-10">
+                        <div className="text-center mb-8">
+                            <SplitTextTitle text="NOS HORAIRES" color="text-orange-500" />
+                            <p className="text-gray-300 max-w-2xl mx-auto text-sm">
+                                Planifiez vos entraînements selon votre emploi du temps
+                            </p>
+                        </div>
+                        
+                        <div className="max-w-4xl mx-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Weekly Schedule Card - More compact version */}
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 30 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.6 }}
+                                    viewport={{ once: true }}
+                                    className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-xl border border-orange-900/20"
+                                >
+                                    <div className="p-1">
+                                        <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-4 rounded-t-lg">
+                                            <h3 className="text-lg font-bold">Heures d'Ouverture</h3>
+                                        </div>
+                                        
+                                        <div className="p-4 space-y-2">
+                                            {[
+                                                { day: "Lundi", hours: "5:00 - 23:00" },
+                                                { day: "Mardi", hours: "5:00 - 23:00" },
+                                                { day: "Mercredi", hours: "5:00 - 23:00" },
+                                                { day: "Jeudi", hours: "5:00 - 23:00" },
+                                                { day: "Vendredi", hours: "5:00 - 23:00" },
+                                                { day: "Samedi", hours: "6:00 - 22:00" },
+                                                { day: "Dimanche", hours: "7:00 - 21:00" }
+                                            ].map((item, index) => (
+                                                <div 
+                                                    key={index} 
+                                                    className="flex justify-between py-2 border-b border-gray-700"
+                                                >
+                                                    <span className="font-medium text-white">{item.day}</span>
+                                                    <span className="text-orange-400 font-medium">{item.hours}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </motion.div>
+                                
+                                {/* Special Info Card - More compact version */}
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 30 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.6, delay: 0.1 }}
+                                    viewport={{ once: true }}
+                                    className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-xl border border-orange-900/20"
+                                >
+                                    <div className="p-1">
+                                        <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-4 rounded-t-lg">
+                                            <h3 className="text-lg font-bold">Informations Utiles</h3>
+                                        </div>
+                                        
+                                        <div className="p-4 space-y-3">
+                                            <div className="flex items-start space-x-3">
+                                                <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-base font-medium text-white">Heures de pointe</h4>
+                                                    <p className="text-gray-300 text-sm">17:00 - 20:00 en semaine</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex items-start space-x-3">
+                                                <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-base font-medium text-white">Accès membres</h4>
+                                                    <p className="text-gray-300 text-sm">Accès 24/7 pour Premium et Élite</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 {/* Promo Banner - Reduced height */}
                 <section className="bg-gradient-to-r from-orange-500 to-red-500 text-white relative overflow-hidden py-6">
                     <div className="absolute inset-0">
