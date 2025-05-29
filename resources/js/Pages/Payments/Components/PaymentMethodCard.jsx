@@ -56,40 +56,51 @@ export default function PaymentMethodCard({ method, selected, onSelect }) {
             
             <style jsx>{`
                 .payment-method-card {
-                    border: 1px solid #f0e4e4;
-                    border-radius: 8px;
-                    padding: 1rem 1.25rem;
+                    border: 1px solid #f0f0f0;
+                    border-radius: 12px;
+                    padding: 1.25rem;
                     cursor: pointer;
-                    transition: all 0.25s ease;
+                    transition: all 0.3s ease;
                     background: white;
                     position: relative;
                     overflow: hidden;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
                 }
                 
                 .payment-method-card:hover {
-                    border-color: #9a0000;
-                    box-shadow: 0 3px 8px rgba(154, 0, 0, 0.1);
-                    transform: translateY(-1px);
-                    background-color: #fffafa;
+                    border-color: #fdba74;
+                    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);
+                    transform: translateY(-2px);
                 }
                 
                 .payment-method-card.selected {
-                    border-color: #9a0000;
-                    background-color: #fff8f8;
-                    box-shadow: 0 2px 6px rgba(154, 0, 0, 0.15);
-                    border-bottom: 3px solid #9a0000;
+                    border-color: #f97316;
+                    background-color: #fff8f3;
+                    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.15);
                 }
                 
-                .payment-method-card.selected:before {
+                .payment-method-card.selected:after {
                     content: '';
                     position: absolute;
                     top: 0;
-                    left: 0;
-                    width: 4px;
-                    height: 100%;
-                    background: #9a0000;
-                    border-radius: 4px 0 0 4px;
+                    right: 0;
+                    width: 0;
+                    height: 0;
+                    border-style: solid;
+                    border-width: 0 40px 40px 0;
+                    border-color: transparent #f97316 transparent transparent;
+                    transition: all 0.3s ease;
+                }
+                
+                .payment-method-card.selected:before {
+                    content: '✓';
+                    position: absolute;
+                    top: 6px;
+                    right: 8px;
+                    color: white;
+                    font-size: 12px;
+                    font-weight: bold;
+                    z-index: 1;
                 }
                 
                 .card-content {
@@ -99,20 +110,32 @@ export default function PaymentMethodCard({ method, selected, onSelect }) {
                 }
                 
                 .method-icon {
-                    width: 42px;
-                    height: 42px;
+                    width: 48px;
+                    height: 48px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    border-radius: 8px;
-                    background-color: #f8e8e8;
-                    color: #9a0000;
+                    border-radius: 10px;
+                    background-color: #fff8f3;
+                    color: #f97316;
                     flex-shrink: 0;
+                    transition: all 0.3s ease;
+                }
+                
+                .payment-method-card.selected .method-icon {
+                    background-color: #f97316;
+                    color: white;
+                    transform: scale(1.05);
                 }
                 
                 .method-icon svg {
-                    width: 22px;
-                    height: 22px;
+                    width: 24px;
+                    height: 24px;
+                    transition: all 0.3s ease;
+                }
+                
+                .payment-method-card.selected .method-icon svg {
+                    transform: scale(1.1);
                 }
                 
                 .method-info {
@@ -128,25 +151,38 @@ export default function PaymentMethodCard({ method, selected, onSelect }) {
                 .radio-input {
                     appearance: none;
                     -webkit-appearance: none;
-                    width: 18px;
-                    height: 18px;
-                    border: 2px solid #e0c8c8;
+                    width: 22px;
+                    height: 22px;
+                    border: 2px solid #e2e8f0;
                     border-radius: 50%;
                     margin-right: 0.75rem;
                     position: relative;
-                    transition: all 0.2s ease;
+                    transition: all 0.3s ease;
                     flex-shrink: 0;
                     outline: none;
+                    background-color: white;
                 }
                 
                 .radio-input:focus {
                     outline: none;
-                    box-shadow: none;
+                    box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+                    border-color: #f97316;
+                }
+                
+                /* Remove browser default styling */
+                .radio-input::-ms-check {
+                    display: none;
+                }
+                
+                /* Override any browser default styles */
+                .radio-input:-moz-focusring {
+                    outline: none;
                 }
                 
                 .radio-input:checked {
-                    border-color: #9a0000;
+                    border-color: #f97316;
                     border-width: 2px;
+                    background-color: white;
                 }
                 
                 .radio-input:checked::after {
@@ -154,28 +190,46 @@ export default function PaymentMethodCard({ method, selected, onSelect }) {
                     position: absolute;
                     top: 50%;
                     left: 50%;
-                    transform: translate(-50%, -50%);
-                    width: 10px;
-                    height: 10px;
+                    transform: translate(-50%, -50%) scale(1);
+                    width: 12px;
+                    height: 12px;
                     border-radius: 50%;
-                    background-color: #9a0000;
+                    background-color: #f97316;
+                    animation: pulseRadio 0.3s ease-out;
+                }
+                
+                @keyframes pulseRadio {
+                    0% {
+                        transform: translate(-50%, -50%) scale(0);
+                        opacity: 0;
+                    }
+                    50% {
+                        transform: translate(-50%, -50%) scale(1.2);
+                        opacity: 0.7;
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) scale(1);
+                        opacity: 1;
+                    }
                 }
                 
                 .method-name {
                     font-weight: 600;
                     color: #333;
-                    font-size: 1rem;
+                    font-size: 1.05rem;
+                    transition: all 0.3s ease;
                 }
                 
                 .method-description {
                     font-size: 0.85rem;
                     color: #666;
                     margin: 0;
-                    line-height: 1.3;
+                    line-height: 1.4;
                 }
                 
                 .payment-method-card.selected .method-name {
-                    color: #9a0000;
+                    color: #f97316;
+                    transform: translateX(3px);
                 }
             `}</style>
         </div>

@@ -1,70 +1,95 @@
-<<<<<<< HEAD
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# PowerGym - Fitness Club Website
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A modern web application for a fitness club built with Laravel and React, featuring a comprehensive subscription and membership management system.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Home Page
+- Dynamic content based on user authentication and subscription status
+- Interactive gallery and program showcases
+- Testimonials from gym members
+- Membership plans display
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Subscription System
+- Multiple subscription tiers (Basic, Premium, Elite)
+- Flexible billing periods (Monthly, Quarterly, Yearly)
+- Promo code support with discounts
+- Subscription management for users
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Advanced Subscription Management
+- Prevents users from having multiple active subscriptions
+- Supports subscription upgrades with prorated pricing
+- Tracks subscription status and remaining days
+- Progress visualization for subscription duration
 
-## Learning Laravel
+### Payment Processing
+- Secure checkout flow
+- Multiple payment method support (Credit Card, PayPal, Bank Transfer)
+- Order summary with discount application
+- Success and failure handling
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Subscription Flow
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+1. **Plan Selection**:
+   - Users browse available plans on the pricing page
+   - Can view different tiers and billing periods
+   - Compare features across plans
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+2. **Order Summary**:
+   - After selecting a plan, users see detailed order information
+   - Can apply promo codes for discounts
+   - Displays original price, discount amount, and final price
 
-## Laravel Sponsors
+3. **Payment Processing**:
+   - Secure payment information entry
+   - Multiple payment methods available
+   - Order details displayed during checkout
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+4. **Subscription Activation**:
+   - Subscription becomes active after successful payment
+   - User is redirected to the subscription management page
+   - Email confirmation is sent
 
-### Premium Partners
+5. **Subscription Management**:
+   - Users can view their active subscriptions
+   - Check remaining time and progress
+   - Upgrade to higher tiers when eligible
+   - Cancel subscriptions if needed
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Upgrade Flow
 
-## Contributing
+1. **Upgrade Eligibility**:
+   - Only users with active subscriptions can upgrade
+   - Only allows upgrading to higher tiers (e.g., Basic → Premium)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. **Prorated Pricing**:
+   - Calculates upgrade cost based on remaining time in current subscription
+   - Credit for unused portion of current subscription
+   - Transparent pricing breakdown
 
-## Code of Conduct
+3. **Payment and Activation**:
+   - Collect payment for the upgrade difference
+   - Previous subscription is marked as upgraded
+   - New subscription begins immediately
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Technical Implementation
 
-## Security Vulnerabilities
+- Laravel backend with Inertia.js + React frontend
+- Database structure optimized for subscription tracking
+- Controllers handle business logic for subscriptions and payments
+- React components for interactive user experience
+- Responsive design for mobile and desktop
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Setup Instructions
+
+1. Clone the repository
+2. Run `composer install` to install PHP dependencies
+3. Run `npm install` to install JavaScript dependencies
+4. Copy `.env.example` to `.env` and configure your database
+5. Run `php artisan migrate` to set up the database tables
+6. Run `npm run dev` to compile assets
+7. Run `php artisan serve` to start the development server
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-=======
-# gym-project-
->>>>>>> bafda7216e9d37220679dcd5ab617ca6028a6fff
+This project is licensed under the MIT License.

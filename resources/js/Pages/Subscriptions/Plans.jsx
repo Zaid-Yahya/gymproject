@@ -5,6 +5,7 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import OrderSummaryModal from './OrderSummaryModal';
 import PlanComparisonTable from './PlanComparisonTable';
+import Navbar from '@/Components/Navbar';
 
 // Animated background component with pink/red particles
 const AnimatedBackground = () => {
@@ -146,50 +147,113 @@ const AnimatedBackground = () => {
 // New Hero Section Component
 const HeroSection = () => {
     return (
-        <div className="relative overflow-hidden bg-gradient-to-r from-red-50 via-orange-50 to-red-50">
+        <div className="relative overflow-hidden bg-gradient-to-b from-gray-900 to-red-900">
+            {/* Dynamic background elements */}
             <div className="absolute inset-0 z-0">
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-orange-500/10 animate-pulse-slow"></div>
-                <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-orange-500/5 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-to-t from-red-500/5 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-red-800/20 to-orange-700/20"></div>
+                <div className="absolute top-0 right-0 w-full h-full bg-[url('/storage/pattern-dots.png')] bg-repeat opacity-5"></div>
+                <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-red-900/50 to-transparent"></div>
+                
+                {/* Animated particles */}
+                <div className="absolute inset-0">
+                    {[...Array(20)].map((_, i) => (
+                        <motion.div
+                            key={i}
+                            className="absolute w-2 h-2 rounded-full bg-red-500/30"
+                            initial={{
+                                x: Math.random() * 100 + "%",
+                                y: Math.random() * 100 + "%",
+                                scale: Math.random() * 0.5 + 0.5
+                            }}
+                            animate={{
+                                y: [
+                                    Math.random() * 100 + "%", 
+                                    Math.random() * 100 + "%"
+                                ],
+                                opacity: [0.3, 0.8, 0.3]
+                            }}
+                            transition={{
+                                duration: Math.random() * 10 + 10,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                            }}
+                        />
+                    ))}
+                </div>
             </div>
             
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative z-10">
-                <div className="flex flex-col md:flex-row items-center">
-                    <div className="w-full md:w-1/2 pr-0 md:pr-12 mb-10 md:mb-0">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative z-10">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+                    <div className="w-full md:w-1/2 md:pr-12">
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, ease: "easeOut" }}
+                            className="relative"
                         >
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-orange-600">
-                                Join Us Today
+                            {/* Decorative elements */}
+                            <div className="absolute -left-6 -top-6 w-20 h-20 rounded-full bg-gradient-to-br from-red-500/20 to-orange-500/20 blur-xl"></div>
+                            
+                            {/* Badge */}
+                            <div className="inline-flex items-center px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 mb-6 text-red-300 text-sm font-medium">
+                                <span className="w-2 h-2 rounded-full bg-red-400 mr-2 animate-pulse"></span>
+                                Premium Membership
+                            </div>
+                            
+                            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 text-white">
+                                Join Us <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-orange-400">Today</span>
                             </h1>
-                            <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed">
+                            
+                            <p className="text-xl md:text-2xl text-gray-300 mb-10 leading-relaxed max-w-xl">
                                 Transform your body and life with our premium membership plans tailored to your fitness journey.
                             </p>
-                            <motion.div 
-                                className="inline-block"
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                            >
-                                <a 
-                                    href="#plans" 
-                                    className="px-8 py-4 bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold rounded-lg shadow-lg hover:shadow-red-500/30 transition-all duration-300 inline-flex items-center"
+                            
+                            <div className="flex flex-wrap gap-4 items-center">
+                                <motion.div 
+                                    className="inline-block"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
                                 >
-                                    Explore Plans
-                                    <motion.svg 
-                                        xmlns="http://www.w3.org/2000/svg" 
-                                        className="h-5 w-5 ml-2" 
-                                        fill="none" 
-                                        viewBox="0 0 24 24" 
-                                        stroke="currentColor"
-                                        animate={{ x: [0, 5, 0] }}
-                                        transition={{ repeat: Infinity, duration: 1.5 }}
+                                    <a 
+                                        href="#plans" 
+                                        className="px-8 py-4 bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold rounded-xl shadow-lg shadow-red-600/20 hover:shadow-red-600/40 transition-all duration-300 inline-flex items-center"
                                     >
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                    </motion.svg>
+                                        Explore Plans
+                                        <motion.svg 
+                                            xmlns="http://www.w3.org/2000/svg" 
+                                            className="h-5 w-5 ml-2" 
+                                            fill="none" 
+                                            viewBox="0 0 24 24" 
+                                            stroke="currentColor"
+                                            animate={{ x: [0, 5, 0] }}
+                                            transition={{ repeat: Infinity, duration: 1.5 }}
+                                        >
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                        </motion.svg>
+                                    </a>
+                                </motion.div>
+                                
+                                <a href="#comparison" className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Compare Plans
                                 </a>
-                            </motion.div>
+                            </div>
+                            
+                            {/* Stats */}
+                            <div className="mt-12 grid grid-cols-3 gap-4">
+                                {[
+                                    { number: "500+", label: "Active Members" },
+                                    { number: "50+", label: "Trainers" },
+                                    { number: "100%", label: "Satisfaction" }
+                                ].map((stat, index) => (
+                                    <div key={index} className="text-center">
+                                        <div className="text-2xl font-bold text-white">{stat.number}</div>
+                                        <div className="text-sm text-gray-400">{stat.label}</div>
+                                    </div>
+                                ))}
+                            </div>
                         </motion.div>
                     </div>
                     
@@ -200,18 +264,33 @@ const HeroSection = () => {
                             transition={{ duration: 0.8, delay: 0.2 }}
                             className="relative"
                         >
-                            <div className="absolute -inset-4 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl blur-lg opacity-30 animate-pulse-slow"></div>
-                            <div className="relative overflow-hidden rounded-xl shadow-2xl">
+                            {/* Enhanced image card */}
+                            <div className="absolute -inset-4 bg-gradient-to-r from-red-600 to-orange-600 rounded-2xl blur-lg opacity-30 animate-pulse-slow"></div>
+                            <div className="relative overflow-hidden rounded-2xl shadow-2xl border border-red-500/20 group">
                                 <img 
                                     src="/storage/join_us.jpg" 
                                     alt="Fitness Training" 
-                                    className="w-full h-auto object-cover transform hover:scale-105 transition-transform duration-700"
+                                    className="w-full h-auto object-cover transform group-hover:scale-105 transition-transform duration-700"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
-                                    <div className="p-6">
-                                        <p className="text-white font-medium text-lg">Start your fitness journey with us</p>
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end">
+                                    <div className="p-8 w-full">
+                                        <p className="text-white font-medium text-xl mb-3">Start your fitness journey with us</p>
+                                        <div className="flex items-center gap-2">
+                                            <span className="inline-block h-1 w-12 bg-red-500 rounded-full"></span>
+                                            <span className="inline-block h-1 w-6 bg-orange-500 rounded-full"></span>
+                                        </div>
                                     </div>
                                 </div>
+                                
+                                {/* Floating elements */}
+                                <motion.div 
+                                    className="absolute top-4 right-4 bg-black/30 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full text-white text-sm font-medium"
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.8 }}
+                                >
+                                    Premium Experience
+                                </motion.div>
                             </div>
                             
                             <motion.div 
@@ -234,157 +313,24 @@ const HeroSection = () => {
     );
 };
 
-// Navigation Bar Component
-const NavigationBar = () => {
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    
-    return (
-        <nav className="fixed top-0 left-0 w-full z-50 transition-all duration-500 bg-white shadow-sm">
-            <div className="container mx-auto px-6">
-                <div className="flex justify-between items-center py-4">
-                    {/* Logo */}
-                    <div className="text-2xl font-extrabold">
-                        <Link href={route('home')}>
-                            <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">POWER</span>
-                            <span className="text-gray-800">GYM</span>
-                        </Link>
-                    </div>
-                    
-                    {/* Desktop Navigation */}
-                    <div className="hidden md:flex space-x-8">
-                        <Link 
-                            href={route('home')}
-                            className="text-sm font-medium transition-all duration-300 text-gray-700 hover:text-orange-500"
-                        >
-                            ACCUEIL
-                        </Link>
-                        <a 
-                            href="#plans"
-                            className="text-sm font-medium transition-all duration-300 text-orange-500"
-                        >
-                            ABONNEMENTS
-                        </a>
-                        <Link 
-                            href={route('home')}
-                            className="text-sm font-medium transition-all duration-300 text-gray-700 hover:text-orange-500"
-                        >
-                            PROGRAMMES
-                        </Link>
-                        <Link 
-                            href={route('home')}
-                            className="text-sm font-medium transition-all duration-300 text-gray-700 hover:text-orange-500"
-                        >
-                            GALERIE
-                        </Link>
-                        <Link 
-                            href={route('home')}
-                            className="text-sm font-medium transition-all duration-300 text-gray-700 hover:text-orange-500"
-                        >
-                            CONTACT
-                        </Link>
-                    </div>
-                    
-                    {/* Authentication Links */}
-                    <div className="hidden md:flex items-center space-x-4">
-                        <Link 
-                            href={route('login')} 
-                            className="px-4 py-2 transition-all duration-300 text-gray-700 hover:text-orange-500"
-                        >
-                            Connexion
-                        </Link>
-                        <Link 
-                            href={route('register')} 
-                            className="px-6 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 hover:scale-105 transform shadow-md hover:shadow-orange-500/30"
-                        >
-                            Rejoindre
-                        </Link>
-                    </div>
-                    
-                    {/* Mobile menu button */}
-                    <button 
-                        className="md:hidden text-gray-700"
-                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    >
-                        {mobileMenuOpen ? (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        ) : (
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-                            </svg>
-                        )}
-                    </button>
-                </div>
-                
-                {/* Mobile menu */}
-                <div className={`md:hidden transition-all duration-500 overflow-hidden ${mobileMenuOpen ? 'max-h-96 mt-4' : 'max-h-0'}`}>
-                    <div className="flex flex-col space-y-4 pt-2 pb-4 rounded-lg shadow-lg bg-white">
-                        <Link 
-                            href={route('home')}
-                            className="text-sm font-medium py-2 transition-all duration-300 text-gray-700 hover:text-orange-500"
-                        >
-                            ACCUEIL
-                        </Link>
-                        <a 
-                            href="#plans"
-                            className="text-sm font-medium py-2 transition-all duration-300 text-orange-500"
-                        >
-                            ABONNEMENTS
-                        </a>
-                        <Link 
-                            href={route('home')}
-                            className="text-sm font-medium py-2 transition-all duration-300 text-gray-700 hover:text-orange-500"
-                        >
-                            PROGRAMMES
-                        </Link>
-                        <Link 
-                            href={route('home')}
-                            className="text-sm font-medium py-2 transition-all duration-300 text-gray-700 hover:text-orange-500"
-                        >
-                            GALERIE
-                        </Link>
-                        <Link 
-                            href={route('home')}
-                            className="text-sm font-medium py-2 transition-all duration-300 text-gray-700 hover:text-orange-500"
-                        >
-                            CONTACT
-                        </Link>
-                        <div className="pt-2 flex flex-col space-y-3 px-4">
-                            <Link 
-                                href={route('login')} 
-                                className="py-2 text-gray-700 hover:text-orange-500 transition-all duration-300"
-                            >
-                                Connexion
-                            </Link>
-                            <Link 
-                                href={route('register')} 
-                                className="py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-center rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300"
-                            >
-                                Rejoindre
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </nav>
-    );
-};
-
-export default function Plans({ plans, hasActiveSubscription }) {
+export default function Plans({ plans, hasActiveSubscription, activeSubscription, canUpgrade, upgradablePlans }) {
     const { auth } = usePage().props;
     const [loading, setLoading] = useState(false);
     const [discountInfo, setDiscountInfo] = useState(null);
     const [discountError, setDiscountError] = useState(null);
     const [selectedPlan, setSelectedPlan] = useState(null);
+    const [isUpgrade, setIsUpgrade] = useState(false);
+    const [selectedUpgradeCost, setSelectedUpgradeCost] = useState(null);
     const [showConfetti, setShowConfetti] = useState(false);
     const [showOrderModal, setShowOrderModal] = useState(false);
+    const [activePeriod, setActivePeriod] = useState('monthly'); // Default active period
 
     const { data, setData, post, processing, errors } = useForm({
         plan_name: '',
         original_price: 0,
         price: 0,
         discount_id: null,
+        duration: 1, // Default to monthly
     });
 
     const { data: discountData, setData: setDiscountData, processing: discountProcessing } = useForm({
@@ -392,32 +338,16 @@ export default function Plans({ plans, hasActiveSubscription }) {
         plan_price: 0,
     });
 
-    const handleSelectPlan = (plan) => {
+    const handleSelectPlan = (plan, isUpgradeFlow = false, upgradeCost = null) => {
         setSelectedPlan(plan);
+        setIsUpgrade(isUpgradeFlow);
+        setSelectedUpgradeCost(upgradeCost);
         setDiscountInfo(null);
         setDiscountData({
             code: '',
             plan_price: plan.price,
         });
         setShowOrderModal(true);
-    };
-
-    const handleSubscribe = () => {
-        const planToUse = selectedPlan;
-        
-        if (!planToUse) return;
-        
-        setData({
-            plan_name: planToUse.name,
-            original_price: planToUse.price,
-            price: discountInfo ? discountInfo.pricing.discounted : planToUse.price,
-            discount_id: discountInfo ? discountInfo.discount.id : null,
-        });
-        
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 3000);
-        
-        post(route('subscriptions.subscribe'));
     };
 
     const handleApplyDiscount = async (e) => {
@@ -445,6 +375,11 @@ export default function Plans({ plans, hasActiveSubscription }) {
             setLoading(false);
         }
     };
+
+    // Group plans by period
+    const monthlyPlans = plans.filter(plan => plan.period === 'monthly');
+    const quarterlyPlans = plans.filter(plan => plan.period === 'quarterly');
+    const yearlyPlans = plans.filter(plan => plan.period === 'yearly');
 
     // Animation variants
     const containerVariants = {
@@ -509,6 +444,23 @@ export default function Plans({ plans, hasActiveSubscription }) {
         }
     ];
 
+    // Period selection tabs
+    const periodTabs = [
+        { id: 'monthly', label: 'Monthly' },
+        { id: 'quarterly', label: '3 Months' },
+        { id: 'yearly', label: 'Yearly' }
+    ];
+
+    // Get plans for current active period
+    const getActivePlans = () => {
+        switch(activePeriod) {
+            case 'monthly': return monthlyPlans;
+            case 'quarterly': return quarterlyPlans;
+            case 'yearly': return yearlyPlans;
+            default: return monthlyPlans;
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-rose-50 to-red-100 relative overflow-hidden">
             <Head title="Subscription Plans" />
@@ -519,7 +471,7 @@ export default function Plans({ plans, hasActiveSubscription }) {
             {/* Background gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-b from-rose-50 via-transparent to-red-100 -z-10"></div>
             
-            <NavigationBar />
+            <Navbar activeSection="membership" />
 
             {/* New Hero Section */}
             <HeroSection />
@@ -560,182 +512,344 @@ export default function Plans({ plans, hasActiveSubscription }) {
                     >
                         <div className="inline-block rounded-xl bg-white bg-opacity-70 p-2 shadow-lg mb-4">
                             <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-8 py-3 rounded-lg">
-                                <h2 className="text-4xl font-bold">Membership Plans</h2>
+                                <h2 className="text-4xl font-bold">Fitness Memberships</h2>
                             </div>
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-800 mb-2">Choose Your Perfect Plan</h3>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-2">Choose The Plan That Fits Your Lifestyle</h3>
                         <motion.p 
                             className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto"
                             animate={pulseAnimation}
                         >
-                            Select a plan that fits your fitness journey and goals
+                            Flexible options designed for every fitness level and goal
                         </motion.p>
                     </motion.div>
 
-                    {hasActiveSubscription && (
+                    {hasActiveSubscription && !canUpgrade && (
                         <motion.div 
-                            className="bg-white border-l-4 border-red-400 p-4 mb-8 rounded-md shadow-md"
+                            className="bg-white border-l-4 border-red-400 p-6 mb-8 rounded-md shadow-md"
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5, delay: 0.2 }}
                         >
-                            <div className="flex">
-                                <div className="flex-shrink-0">
+                            <div className="flex items-start">
+                                <div className="flex-shrink-0 pt-0.5">
                                     <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
                                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                     </svg>
                                 </div>
                                 <div className="ml-3">
-                                    <p className="text-sm text-gray-600">
-                                        You already have an active subscription. Subscribing to a new plan will replace your current one.
-                                        <Link
-                                            href={route('subscriptions.index')}
-                                            className="font-medium underline text-red-500 hover:text-red-600 ml-1 transition-colors duration-300"
-                                        >
-                                            View your current subscriptions
-                                        </Link>
-                                    </p>
+                                    <h3 className="text-lg font-medium text-gray-900">You Already Have an Active Subscription</h3>
+                                    <div className="mt-2 text-base text-gray-600">
+                                        <p>
+                                            You currently have the <span className="font-semibold">{activeSubscription?.plan_name}</span> plan which is active until {new Date(activeSubscription?.end_date).toLocaleDateString()}.
+                                        </p>
+                                        <p className="mt-2">
+                                            You are already on our highest tier plan. To manage your existing subscription, please visit your subscription page.
+                                        </p>
+                                        <div className="mt-4">
+                                            <Link
+                                                href={route('subscriptions.index')}
+                                                className="inline-flex items-center px-4 py-2 bg-red-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-600 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                                            >
+                                                View My Subscription
+                                            </Link>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>
                     )}
 
-                    <motion.div 
-                        className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="visible"
-                    >
-                        {plans.map((plan, index) => {
-                            const isSelected = selectedPlan && selectedPlan.name === plan.name;
-                            const isPopular = plan.popular;
-                            const colorSet = planColors[index % planColors.length];
-                            
-                            return (
-                                <motion.div
-                                    key={index}
-                                    variants={itemVariants}
-                                    whileHover={{ 
-                                        y: -10,
-                                        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
-                                    }}
-                                    className={`bg-white rounded-2xl overflow-hidden shadow-xl transition-all duration-300 ${
-                                        isSelected 
-                                            ? `${colorSet.ring} ring-2 scale-105` 
-                                            : 'hover:shadow-2xl'
-                                    } ${isPopular ? `${colorSet.border} border-2` : ''}`}
-                                >
-                                    {isPopular && (
-                                        <motion.div 
-                                            className={`bg-gradient-to-r ${colorSet.gradient} text-white text-center py-2 font-semibold`}
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            transition={{ delay: 0.5 }}
-                                        >
-                                            MOST POPULAR
-                                        </motion.div>
-                                    )}
+                    {hasActiveSubscription && canUpgrade && (
+                        <motion.div 
+                            className="bg-white border-l-4 border-orange-400 p-6 mb-8 rounded-md shadow-md"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                        >
+                            <div className="flex items-start">
+                                <div className="flex-shrink-0 pt-0.5">
+                                    <svg className="h-5 w-5 text-orange-500" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div className="ml-3">
+                                    <h3 className="text-lg font-medium text-gray-900">Upgrade Your Current Plan</h3>
+                                    <div className="mt-2 text-base text-gray-600">
+                                        <p>
+                                            You currently have the <span className="font-semibold">{activeSubscription?.plan_name}</span> plan which is active until {new Date(activeSubscription?.end_date).toLocaleDateString()}.
+                                        </p>
+                                        <p className="mt-2">
+                                            You can upgrade to a higher tier plan. The upgrade price will be calculated based on the remaining time in your current subscription.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {hasActiveSubscription && canUpgrade && (
+                        <div className="mb-12">
+                            <h3 className="text-2xl font-bold text-center mb-8 text-gray-800">Available Upgrades</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {upgradablePlans.map((plan, index) => {
+                                    const colorSet = planColors[index % planColors.length];
                                     
-                                    <div className="p-6">
-                                        <div className={`w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-gradient-to-br ${colorSet.gradient} shadow-lg`}>
-                                            <svg 
-                                                className="w-8 h-8 text-white" 
-                                                fill="none" 
-                                                stroke="currentColor" 
-                                                viewBox="0 0 24 24"
-                                            >
-                                                {index === 0 ? (
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                                ) : index === 1 ? (
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                                ) : (
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                                )}
-                                            </svg>
-                                        </div>
-                                        
-                                        <h3 className="text-2xl font-bold mb-2 text-center text-gray-800">{plan.name}</h3>
-                                        
-                                        <div className="flex items-baseline justify-center mb-6">
-                                            <span className={`text-5xl font-bold ${colorSet.text}`}>${plan.price}</span>
-                                            <span className="text-gray-500 ml-1 text-lg">/{plan.period}</span>
-                                        </div>
-                                        
-                                        <div className={`h-1 ${colorSet.accent} rounded-full mb-6`}></div>
+                                    return (
+                                        <motion.div
+                                            key={index}
+                                            variants={itemVariants}
+                                            whileHover={{ 
+                                                y: -10,
+                                                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                                            }}
+                                            className={`bg-white rounded-2xl overflow-hidden shadow-xl transition-all duration-300 flex flex-col h-full`}
+                                        >
+                                            <div className={`bg-gradient-to-r ${colorSet.gradient} text-white text-center py-2 font-semibold`}>
+                                                UPGRADE OPTION
+                                            </div>
                                             
-                                        <ul className="space-y-3 mb-8">
-                                            {plan.features.map((feature, idx) => (
-                                                <motion.li 
-                                                    key={idx} 
-                                                    className="flex items-center text-gray-600"
-                                                    initial={{ opacity: 0, x: -10 }}
-                                                    animate={{ opacity: 1, x: 0 }}
-                                                    transition={{ delay: 0.1 * idx }}
-                                                >
-                                                    <div className={`w-6 h-6 rounded-full ${colorSet.accent} flex items-center justify-center mr-2 flex-shrink-0`}>
-                                                        <svg 
-                                                            className={`w-4 h-4 ${colorSet.icon}`}
-                                                            fill="currentColor" 
-                                                            viewBox="0 0 20 20"
-                                                        >
-                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                        </svg>
+                                            <div className="p-8 flex-grow">
+                                                <div className="text-center mb-6">
+                                                    <h3 className="text-xl font-bold text-gray-800">{plan.name}</h3>
+                                                    
+                                                    <div className={`inline-block ${colorSet.accent} ${colorSet.text} text-xs font-semibold px-2.5 py-0.5 rounded-full mt-1 mb-3`}>
+                                                        {plan.period === 'monthly' ? 'Monthly' : 
+                                                        plan.period === 'quarterly' ? '3 Months' : 'Annual'}
                                                     </div>
-                                                    <span>{feature}</span>
-                                                </motion.li>
-                                            ))}
-                                        </ul>
-                                        
-                                        <div className="h-12 flex items-center justify-center"> {/* Fixed height container for buttons */}
-                                            <motion.button
-                                                onClick={() => handleSelectPlan(plan)}
-                                                whileTap={{ scale: 0.95 }}
-                                                whileHover={{ scale: 1.05 }}
-                                                className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 shadow-md ${
-                                                    isSelected
-                                                        ? `bg-gradient-to-r ${colorSet.button} text-white`
-                                                        : `bg-gradient-to-r ${colorSet.button} text-white hover:shadow-lg hover:shadow-${colorSet.button.split('-')[2]}-500/30`
+                                                    
+                                                    <div className="flex items-baseline justify-center">
+                                                        <span className="text-3xl font-extrabold">{plan.upgrade_cost}€</span>
+                                                        <span className="text-gray-500 ml-1 text-sm">
+                                                            upgrade price
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <div className="mt-2 text-sm text-green-600 font-medium">
+                                                        Based on {activeSubscription.remaining_days} days remaining
+                                                    </div>
+                                                </div>
+                                                
+                                                <ul className="space-y-3 mb-8">
+                                                    {plan.features.map((feature, idx) => (
+                                                        <li key={idx} className="flex items-start">
+                                                            <div className={`flex-shrink-0 ${colorSet.icon}`}>
+                                                                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                </svg>
+                                                            </div>
+                                                            <span className="ml-2 text-gray-600">{feature}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                            
+                                            <div className="p-6 bg-gray-50 border-t">
+                                                <button
+                                                    onClick={() => handleSelectPlan(plan, true, plan.upgrade_cost)}
+                                                    className={`w-full px-4 py-3 bg-gradient-to-r ${colorSet.button} text-white font-medium rounded-lg hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${colorSet.ring}`}
+                                                >
+                                                    Upgrade Now
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {!hasActiveSubscription && (
+                        <>
+                            {/* Period selection tabs */}
+                            <div className="flex justify-center mb-8">
+                                <div className="bg-white p-1 rounded-xl shadow-md">
+                                    <div className="flex space-x-1">
+                                        {periodTabs.map((tab) => (
+                                            <button
+                                                key={tab.id}
+                                                onClick={() => setActivePeriod(tab.id)}
+                                                className={`px-6 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                                                    activePeriod === tab.id
+                                                        ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md'
+                                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                                                 }`}
                                             >
-                                                {isSelected ? 'Selected' : 'Select Plan'}
-                                            </motion.button>
-                                        </div>
+                                                {tab.label}
+                                            </button>
+                                        ))}
                                     </div>
-                                </motion.div>
-                            );
-                        })}
-                    </motion.div>
+                                </div>
+                            </div>
+                            
+                            {/* Period Description */}
+                            <div className="text-center mb-8">
+                                {activePeriod === 'monthly' && (
+                                    <p className="text-gray-600">Pay monthly with no long-term commitment.</p>
+                                )}
+                                {activePeriod === 'quarterly' && (
+                                    <p className="text-gray-600">Save 10% with our 3-month subscription plans.</p>
+                                )}
+                                {activePeriod === 'yearly' && (
+                                    <p className="text-gray-600">Our best value! Save 20% with annual subscriptions.</p>
+                                )}
+                            </div>
 
-                    {/* Plan Comparison Table */}
-                    <PlanComparisonTable plans={plans} />
-
-                    {/* Order Summary Modal */}
-                    <OrderSummaryModal
-                        show={showOrderModal}
-                        onClose={() => setShowOrderModal(false)}
-                        selectedPlan={selectedPlan}
-                        discountInfo={discountInfo}
-                        discountError={discountError}
-                        discountData={discountData}
-                        setDiscountData={setDiscountData}
-                        handleApplyDiscount={handleApplyDiscount}
-                        handleSubscribe={handleSubscribe}
-                        loading={loading}
-                        processing={processing}
-                    />
+                            <motion.div 
+                                className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"
+                                variants={containerVariants}
+                                initial="hidden"
+                                animate="visible"
+                            >
+                                {getActivePlans().map((plan, index) => {
+                                    const isSelected = selectedPlan && selectedPlan.name === plan.name;
+                                    const isPopular = plan.popular;
+                                    const colorSet = planColors[index % planColors.length];
+                                    
+                                    return (
+                                        <motion.div
+                                            key={index}
+                                            variants={itemVariants}
+                                            whileHover={{ 
+                                                y: -10,
+                                                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                                            }}
+                                            className={`bg-white rounded-2xl overflow-hidden shadow-xl transition-all duration-300 flex flex-col h-full ${
+                                                isSelected 
+                                                    ? `${colorSet.ring} ring-2 scale-105` 
+                                                    : 'hover:shadow-2xl'
+                                            } ${isPopular ? `${colorSet.border} border-2` : ''}`}
+                                        >
+                                            {isPopular && (
+                                                <motion.div 
+                                                    className={`bg-gradient-to-r ${colorSet.gradient} text-white text-center py-2 font-semibold`}
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    transition={{ delay: 0.5 }}
+                                                >
+                                                    MOST POPULAR
+                                                </motion.div>
+                                            )}
+                                            
+                                            <div className={`p-8 ${isPopular ? 'pt-6' : ''} flex-grow`}>
+                                                <div className="text-center mb-6">
+                                                    <h3 className="text-xl font-bold text-gray-800">{plan.name}</h3>
+                                                    
+                                                    {/* Period badge */}
+                                                    <div className={`inline-block ${colorSet.accent} ${colorSet.text} text-xs font-semibold px-2.5 py-0.5 rounded-full mt-1 mb-3`}>
+                                                        {plan.period === 'monthly' ? 'Monthly' : 
+                                                        plan.period === 'quarterly' ? '3 Months' : 'Annual'}
+                                                    </div>
+                                                    
+                                                    <div className="flex items-baseline justify-center">
+                                                        <span className="text-3xl font-extrabold">{plan.price}€</span>
+                                                        <span className="text-gray-500 ml-1 text-sm">
+                                                            /{plan.period === 'monthly' ? 'month' : 
+                                                            plan.period === 'quarterly' ? '3 months' : 'year'}
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    {/* Show savings information for quarterly and yearly plans */}
+                                                    {plan.savings && (
+                                                        <div className="mt-2 text-sm text-green-600 font-medium">
+                                                            {plan.savings}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                
+                                                <ul className="space-y-3 mb-8">
+                                                    {plan.features.map((feature, idx) => (
+                                                        <li key={idx} className="flex items-start">
+                                                            <div className={`flex-shrink-0 ${colorSet.icon}`}>
+                                                                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                </svg>
+                                                            </div>
+                                                            <span className="ml-2 text-gray-600">{feature}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                            
+                                            <div className="p-6 bg-gray-50 border-t">
+                                                <button
+                                                    onClick={() => handleSelectPlan(plan)}
+                                                    className={`w-full px-4 py-3 bg-gradient-to-r ${colorSet.button} text-white font-medium rounded-lg hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${colorSet.ring}`}
+                                                >
+                                                    Select Plan
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    );
+                                })}
+                            </motion.div>
+                            
+                            {/* Show message if no plans are available for selected period */}
+                            {getActivePlans().length === 0 && (
+                                <div className="text-center py-10">
+                                    <p className="text-gray-600">No plans available for this period at the moment.</p>
+                                </div>
+                            )}
+                            
+                            {/* Plan comparison notice */}
+                            <div className="text-center mt-8">
+                                <Link 
+                                    href="#comparison"
+                                    className="text-orange-600 hover:text-red-600 font-medium transition-colors duration-300"
+                                >
+                                    View plan comparison table
+                                    <svg className="inline-block ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </Link>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
-
-            {/* Add custom animation styles */}
-            <style jsx global>{`
-                @keyframes pulse-slow {
-                    0%, 100% { opacity: 0.7; }
-                    50% { opacity: 1; }
-                }
-                .animate-pulse-slow {
-                    animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-                }
-            `}</style>
+            
+            {/* Order Summary Modal */}
+            {showOrderModal && (
+                <OrderSummaryModal
+                    isOpen={showOrderModal}
+                    onClose={() => setShowOrderModal(false)}
+                    plan={selectedPlan}
+                    discountData={discountData}
+                    setDiscountData={setDiscountData}
+                    discountInfo={discountInfo}
+                    discountError={discountError}
+                    onApplyDiscount={handleApplyDiscount}
+                    isUpgrade={isUpgrade}
+                    activeSubscription={activeSubscription}
+                    upgradeCost={selectedUpgradeCost}
+                    loading={loading}
+                    processing={processing}
+                />
+            )}
+            
+            {/* Plan Comparison Table Section */}
+            <div id="comparison" className="py-16 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-10">
+                        <h2 className="text-3xl font-bold text-gray-800 mb-2">Plan Comparison</h2>
+                        <p className="text-gray-600">Compare our subscription options to find the perfect fit</p>
+                    </div>
+                    
+                    <PlanComparisonTable plans={plans} />
+                </div>
+            </div>
+            
+            {/* FAQ Section */}
+            <div className="py-16 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-10">
+                        <h2 className="text-3xl font-bold text-gray-800 mb-2">Frequently Asked Questions</h2>
+                        <p className="text-gray-600">Everything you need to know about our membership plans</p>
+                    </div>
+                    
+                    {/* FAQ content here */}
+                </div>
+            </div>
         </div>
     );
 } 

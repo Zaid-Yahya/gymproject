@@ -42,6 +42,7 @@ const SplitTextTitle = ({ text, color = "text-orange-600" }) => {
 const CircularGallery = () => {
     const containerRef = useRef(null);
     const [paused, setPaused] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
     
     // Gallery images data with labels - gym/fitness images
     const galleryImages = [
@@ -113,35 +114,77 @@ const CircularGallery = () => {
             document.head.removeChild(style);
         };
     }, []);
-    
     // Create two sets of the same images to ensure seamless looping
     const doubledImages = [...galleryImages, ...galleryImages];
     
+    // Function to handle image click
+    const handleImageClick = (image) => {
+        setSelectedImage(image);
+    };
+    
+    // Function to close the modal
+    const closeModal = () => {
+        setSelectedImage(null);
+    };
+    
     return (
-        <div className="gallery-container">
-            <div className="gallery-track">
-                {doubledImages.map((image, index) => (
-                    <div key={index} className="gallery-item">
-                        <div className="relative rounded-lg overflow-hidden shadow-2xl h-[480px] transition-all duration-300 hover:scale-105">
-                            <img
-                                src={image.src}
-                                alt={image.alt}
-                                className="w-full h-full object-cover filter grayscale"
-                            />
-                            <div className="absolute bottom-0 left-0 right-0 text-center p-4 bg-black bg-opacity-40">
-                                <p className="text-white text-lg font-semibold">
-                                    {image.label}
-                                </p>
+        <>
+            <div className="gallery-container">
+                <div className="gallery-track">
+                    {doubledImages.map((image, index) => (
+                        <div key={index} className="gallery-item">
+                            <div 
+                                className="relative rounded-lg overflow-hidden shadow-2xl h-[480px] transition-all duration-300 hover:scale-105 cursor-pointer"
+                                onClick={() => handleImageClick(image)}
+                            >
+                                <img
+                                    src={image.src}
+                                    alt={image.alt}
+                                    className="w-full h-full object-cover filter grayscale"
+                                />
+                                <div className="absolute bottom-0 left-0 right-0 text-center p-4 bg-black bg-opacity-40">
+                                    <p className="text-white text-lg font-semibold">
+                                        {image.label}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                
+                {/* Black fade gradient on sides for seamless look */}
+                <div className="absolute top-0 left-0 h-full w-16 bg-gradient-to-r from-black to-transparent z-10"></div>
+                <div className="absolute top-0 right-0 h-full w-16 bg-gradient-to-l from-black to-transparent z-10"></div>
+            </div>
+            
+            {/* Image Modal */}
+            {selectedImage && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm" onClick={closeModal}>
+                    <div className="relative max-w-4xl max-h-[90vh] w-full" onClick={(e) => e.stopPropagation()}>
+                        <div className="bg-black bg-opacity-70 rounded-lg overflow-hidden shadow-2xl">
+                            <div className="relative">
+                                <button 
+                                    className="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-70 transition-all z-20"
+                                    onClick={closeModal}
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                                <img 
+                                    src={selectedImage.src} 
+                                    alt={selectedImage.alt} 
+                                    className="w-full h-auto max-h-[80vh] object-contain"
+                                />
+                                <div className="absolute bottom-0 left-0 right-0 p-4 bg-black bg-opacity-60">
+                                    <h3 className="text-white text-xl font-bold">{selectedImage.label}</h3>
+                                </div>
                             </div>
                         </div>
                     </div>
-                ))}
-            </div>
-            
-            {/* Black fade gradient on sides for seamless look */}
-            <div className="absolute top-0 left-0 h-full w-16 bg-gradient-to-r from-black to-transparent z-10"></div>
-            <div className="absolute top-0 right-0 h-full w-16 bg-gradient-to-l from-black to-transparent z-10"></div>
-        </div>
+                </div>
+            )}
+        </>
     );
 };
 
@@ -502,15 +545,15 @@ const UserAvatar = ({ user, size = 'md' }) => {
         lg: 'text-lg'
     };
     
-    // Get first letter of name if no avatar
+    // Get first letter of name if no image
     const firstLetter = user?.name ? user.name.charAt(0).toUpperCase() : 'U';
     
-    // If user has avatar, display it
-    if (user?.avatar) {
+    // If user has image, display it
+    if (user?.image) {
         return (
             <div className="relative">
                 <img 
-                    src={user.avatar} 
+                    src={`/storage/${user.image}`} 
                     alt={user.name || 'Utilisateur'} 
                     className={`${sizeClasses[size]} rounded-full object-cover border-2 border-orange-500 shadow-lg`}
                 />
@@ -895,7 +938,7 @@ const ProgramParticles = () => {
 };
 
 // Main component
-export default function Home({ comments: initialComments, auth }) {
+export default function Home({ comments: initialComments, auth, activeSubscription, hasActiveSubscription }) {
     // Ref for sections scrolling
     const heroRef = useRef(null);
     const galleryRef = useRef(null);
@@ -1222,7 +1265,7 @@ export default function Home({ comments: initialComments, auth }) {
                 <Navbar activeSection={activeSection} />
 
                 {/* Hero Section */}
-                <section ref={heroRef} className="relative h-[calc(100vh-76px)] mt-[76px]">
+                <section ref={heroRef} className="relative h-screen">
                     {/* Background image with overlay */}
                     <div className="absolute inset-0">
                         <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-orange-900/50 z-10"></div>
@@ -1441,10 +1484,10 @@ export default function Home({ comments: initialComments, auth }) {
                 </section>
 
                 {/* Membership Plans Section - With vibrant gradient theme */}
-                <section ref={membershipRef} className="py-24 relative overflow-hidden bg-gradient-to-b from-orange-100 via-orange-50 to-red-50">
+                <section ref={membershipRef} className="py-24 relative overflow-hidden bg-gradient-to-b from-gray-100 via-gray-50 to-gray-50">
                     {/* Background elements */}
-                    <div className="absolute -top-20 -right-20 w-80 h-80 bg-orange-400 rounded-full opacity-30 blur-3xl animate-pulse-slow"></div>
-                    <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-red-400 rounded-full opacity-30 blur-3xl animate-pulse-slow"></div>
+                    <div className="absolute -top-20 -right-20 w-80 h-80 bg-gray-400 rounded-full opacity-30 blur-3xl animate-pulse-slow"></div>
+                    <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gray-400 rounded-full opacity-30 blur-3xl animate-pulse-slow"></div>
                     
                     <div className="container mx-auto px-6 relative z-10">
                         <div className="text-center mb-16">
@@ -1467,21 +1510,105 @@ export default function Home({ comments: initialComments, auth }) {
                                 viewport={{ once: true }}
                                 className="text-gray-700 max-w-2xl mx-auto"
                             >
-                                Choisissez la formule d'abonnement qui correspond à votre parcours et à vos objectifs fitness.
+                                {auth?.user && hasActiveSubscription 
+                                    ? "Gérez votre abonnement actif ou découvrez des options de mise à niveau"
+                                    : "Choisissez la formule d'abonnement qui correspond à votre parcours et à vos objectifs fitness."}
                             </motion.p>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                            {membershipPlans.map((plan, index) => {
-                                const isPopular = plan.popular;
+                        {auth?.user && hasActiveSubscription ? (
+                            // Show content for users with active subscriptions
+                            <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-4xl mx-auto">
+                                <div className="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-8 text-white">
+                                    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                                        <div>
+                                            <h3 className="text-xl font-bold mb-2">Abonnement Actif</h3>
+                                            <p className="text-orange-100">
+                                                {activeSubscription?.plan_name || 'Premium'} Plan - {activeSubscription?.period === 'monthly' ? 'Mensuel' : activeSubscription?.period === 'quarterly' ? 'Trimestriel' : 'Annuel'}
+                                            </p>
+                                        </div>
+                                        <div className="mt-4 md:mt-0">
+                                            <span className="bg-white text-orange-600 font-bold px-4 py-2 rounded-full">
+                                                Actif
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                                 
-                                return (
-                                <motion.div 
-                                    initial={{ opacity: 0, y: 50 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.8, delay: 0.1 * index }}
-                                    viewport={{ once: true }}
-                                    key={index}
+                                <div className="p-6 md:p-8">
+                                    <div className="mb-6">
+                                        <h4 className="text-lg font-medium text-gray-800 mb-3">Options</h4>
+                                        <div className="flex flex-col md:flex-row md:space-x-4 space-y-3 md:space-y-0">
+                                            <Link
+                                                href={route('subscriptions.index')}
+                                                className="px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-center transition-colors duration-200 flex-1"
+                                            >
+                                                Gérer mon abonnement
+                                            </Link>
+                                            <Link
+                                                href={route('subscriptions.plans')}
+                                                className="px-4 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-lg text-center transition-colors duration-200 shadow-md flex-1"
+                                            >
+                                                Explorer les options de mise à niveau
+                                            </Link>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="border-t border-gray-200 pt-6">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <span className="text-gray-600">Date d'expiration</span>
+                                            <span className="font-medium">
+                                                {new Date(activeSubscription?.end_date).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                            <div 
+                                                className="bg-gradient-to-r from-orange-500 to-red-500 h-2.5 rounded-full" 
+                                                style={{ width: `${activeSubscription?.percent_used || 70}%` }}
+                                            ></div>
+                                        </div>
+                                        <div className="flex justify-between text-sm mt-2">
+                                            <span className="text-gray-500">Début: {new Date(activeSubscription?.start_date).toLocaleDateString()}</span>
+                                            <span className="text-gray-500">Jours restants: {activeSubscription?.remaining_days || 0}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    {activeSubscription?.plan_name !== 'Elite' && (
+                                        <div className="mt-6 bg-orange-50 border border-orange-200 rounded-lg p-4">
+                                            <div className="flex items-start">
+                                                <svg className="h-6 w-6 text-orange-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clipRule="evenodd" />
+                                                </svg>
+                                                <div className="ml-3">
+                                                    <h4 className="font-medium text-gray-800">Passez à un niveau supérieur</h4>
+                                                    <p className="text-sm text-gray-600 mt-1">
+                                                        Améliorez votre expérience fitness en passant à un plan supérieur pour profiter d'avantages exclusifs.
+                                                    </p>
+                                                    <Link
+                                                        href={route('subscriptions.plans')}
+                                                        className="inline-block mt-2 text-sm font-medium text-orange-600 hover:text-red-600"
+                                                    >
+                                                        Voir les options de mise à niveau →
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            // Show regular membership plans
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                                {membershipPlans.map((plan, index) => {
+                                    const isPopular = plan.popular;
+                                    
+                                    return (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 50 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.8, delay: 0.1 * index }}
+                                        viewport={{ once: true }}
+                                        key={index}
                                         className={`relative rounded-2xl overflow-hidden transition-all duration-500 hover:transform hover:scale-105 hover:shadow-2xl flex flex-col ${
                                             isPopular ? 'shadow-xl border-2 border-orange-500 scale-105 z-10 bg-gradient-to-b from-gray-900 to-black' : 'shadow-lg bg-gradient-to-b from-gray-800 to-gray-900'
                                         }`}
@@ -1527,372 +1654,157 @@ export default function Home({ comments: initialComments, auth }) {
                                             </Link>
                                         </div>
                                     </motion.div>
-                                );
-                            })}
-                        </div>
-                        
-                        {/* Membership note */}
-                    
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 </section>
 
-                {/* IMC Calculator Section */}
-                <section className="py-24 bg-black relative overflow-hidden">
+                {/* Horaire Section - Styled to match the membership theme */}
+                <section ref={trainersRef} className="py-20 relative overflow-hidden bg-gradient-to-b from-gray-900 via-black to-gray-900">
                     {/* Background elements */}
-                    <div className="absolute -top-40 -left-40 w-80 h-80 bg-orange-600 rounded-full opacity-10 blur-3xl"></div>
-                    <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-orange-600 rounded-full opacity-10 blur-3xl"></div>
+                    <div className="absolute -top-40 -left-20 w-80 h-80 bg-gray-800 rounded-full opacity-10 blur-3xl animate-pulse-slow"></div>
+                    <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-gray-800 rounded-full opacity-10 blur-3xl animate-pulse-slow"></div>
+                    <div className="absolute inset-0 bg-pattern-overlay opacity-5"></div>
                     
                     <div className="container mx-auto px-6 relative z-10">
-                        <div className="text-center mb-16">
-                            <h2 className="inline-block text-3xl md:text-5xl font-bold text-white mb-4 relative">
-                                CALCULEZ VOTRE IMC
-                                <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-orange-400 to-red-500"></div>
-                            </h2>
-                            <p className="text-gray-400 max-w-2xl mx-auto">
-                                Suivez vos progrès fitness en calculant votre Indice de Masse Corporelle (IMC). Obtenez des conseils et recommandations personnalisés.
-                            </p>
-                        </div>
-
-                        <div className="max-w-4xl mx-auto bg-gradient-to-br from-gray-900 to-black rounded-2xl p-8 shadow-2xl transform hover:scale-105 transition-all duration-300">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                                <div className="space-y-6">
-                                    <div className="space-y-2">
-                                        <h3 className="text-2xl font-bold text-white">Pourquoi calculer votre IMC ?</h3>
-                                        <p className="text-gray-400">L'IMC est un indicateur important de votre état de santé et peut vous aider à :</p>
-                                    </div>
-                                    
-                                    <ul className="space-y-4">
-                                        <li className="flex items-start space-x-3">
-                                            <svg className="w-6 h-6 text-orange-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                            <span className="text-gray-300">Évaluer votre catégorie de poids</span>
-                                        </li>
-                                        <li className="flex items-start space-x-3">
-                                            <svg className="w-6 h-6 text-orange-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                            <span className="text-gray-300">Suivre vos progrès fitness</span>
-                                        </li>
-                                        <li className="flex items-start space-x-3">
-                                            <svg className="w-6 h-6 text-orange-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                            <span className="text-gray-300">Obtenir des conseils santé personnalisés</span>
-                                        </li>
-                                    </ul>
-                                </div>
-
-                                <div className="text-center">
-                                    <div className="mb-8">
-                                        <img 
-                                            src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=300&q=80"
-                                            alt="Calculateur IMC"
-                                            className="w-32 h-32 mx-auto rounded-full object-cover border-4 border-orange-500 shadow-xl"
-                                        />
-                                    </div>
-                                    <Link
-                                        href={route('bmi.calculator')}
-                                        className="inline-block px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-full hover:from-orange-600 hover:to-red-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-orange-600/30"
-                                    >
-                                        Calculez votre IMC maintenant
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-{/* AVIS Section - Redesigned to match reference image with different colors */}
-                <section className="py-16 bg-gradient-to-b from-white to-orange-50">
-                    <div className="container mx-auto px-6">
-                        <div className="text-center mb-10">
-                            <div className="inline-block bg-orange-100 text-orange-600 px-4 py-1 rounded-full text-sm font-medium mb-3">
-                                Témoignages de Clients
-                            </div>
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
-                                Ce Que Disent Nos Clients
-                            </h2>
-                            <p className="text-gray-600 max-w-2xl mx-auto">
-                                Ne vous contentez pas de notre parole. Voici ce que les personnes qui ont 
-                                vécu l'expérience POWERGYM ont à dire sur leur parcours avec nous.
-                            </p>
-                        </div>
-
-                        <div className="relative max-w-3xl mx-auto">
-                            {comments && comments.length > 0 ? (
-                                <div className="relative">
-                                    {comments.map((comment, index) => (
-                                        <div 
-                                            key={index}
-                                            className={`transition-opacity duration-500 ${
-                                                index === currentTestimonialIndex ? 'block opacity-100' : 'hidden opacity-0'
-                                            }`}
-                                        >
-                                            <div className="text-center bg-gradient-to-br from-orange-50 to-white p-8 rounded-xl shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_10px_40px_-15px_rgba(0,0,0,0.2)] transition-all duration-300 border border-orange-100">
-                                                <div className="mb-6 flex justify-center">
-                                                    <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg">
-                                                        {comment?.name ? comment.name.charAt(0) : '?'}{comment?.name?.split(' ')?.[1]?.charAt(0) || ''}
-                                                    </div>
-                                                </div>
-                                                
-                                                <div className="flex justify-center mb-6">
-                                                    {[...Array(5)].map((_, i) => (
-                                                        <svg 
-                                                            key={i} 
-                                                            className={`w-5 h-5 mx-0.5 ${i < (comment?.rating || 5) ? 'text-yellow-400' : 'text-gray-300'}`}
-                                                            fill="currentColor"
-                                                            viewBox="0 0 20 20"
-                                                        >
-                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                                        </svg>
-                                                    ))}
-                                                </div>
-                                                
-                                                <blockquote className="text-xl md:text-2xl font-medium text-gray-800 mb-8">
-                                                    "{comment?.content || 'Excellent service!'}"
-                                                </blockquote>
-                                                
-                                                <div className="mb-2">
-                                                    <h3 className="text-lg font-bold text-gray-800">{comment?.name || 'Client'}</h3>
-                                                </div>
-                                                <p className="text-orange-600">
-                                                    {comment?.program || 'Membre Premium'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center bg-gradient-to-br from-orange-50 to-white p-8 rounded-xl shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] hover:shadow-[0_10px_40px_-15px_rgba(0,0,0,0.2)] transition-all duration-300 border border-orange-100">
-                                    <div className="mb-6 flex justify-center">
-                                        <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg">
-                                            ML
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="flex justify-center mb-6">
-                                        {[...Array(5)].map((_, i) => (
-                                            <svg 
-                                                key={i} 
-                                                className="w-5 h-5 mx-0.5 text-yellow-400"
-                                                fill="currentColor"
-                                                viewBox="0 0 20 20"
-                                            >
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                            </svg>
-                                        ))}
-                                    </div>
-                                    
-                                    <blockquote className="text-xl md:text-2xl font-medium text-gray-800 mb-8">
-                                        "J'ai essayé de nombreuses salles de sport, mais POWERGYM est de loin la meilleure. Les équipements sont modernes, les coachs attentifs et mon corps n'a jamais été aussi en forme!"
-                                    </blockquote>
-                                    
-                                    <div className="mb-2">
-                                        <h3 className="text-lg font-bold text-gray-800">Marie Laurent</h3>
-                                    </div>
-                                    <p className="text-orange-600">
-                                        Membre Premium
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Navigation Arrows */}
-                            <button
-                                onClick={prevTestimonial}
-                                className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-12 md:-translate-x-16 bg-white w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:text-orange-600 focus:outline-none"
+                        <div className="text-center mb-12">
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8 }}
+                                viewport={{ once: true }}
+                                className="mb-6"
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
-                                </svg>
-                            </button>
-                            
-                            <button
-                                onClick={nextTestimonial}
-                                className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-12 md:translate-x-16 bg-white w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:text-orange-600 focus:outline-none"
+                                <h2 className="text-4xl md:text-5xl font-bold mb-2">
+                                    <span className="text-white">NOS <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">HORAIRES</span></span>
+                                </h2>
+                                <div className="h-1 w-24 bg-gradient-to-r from-orange-400 to-red-500 mx-auto"></div>
+                            </motion.div>
+                            <motion.p 
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.2 }}
+                                viewport={{ once: true }}
+                                className="text-gray-300 max-w-2xl mx-auto"
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        
-                        {/* Pagination dots */}
-                        <div className="flex justify-center mt-8">
-                            {(comments && comments.length > 0) ? (
-                                comments.map((_, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => setCurrentTestimonialIndex(index)}
-                                        className={`w-2.5 h-2.5 mx-1 rounded-full transition-all ${
-                                            index === currentTestimonialIndex 
-                                                ? 'bg-orange-500 w-8' 
-                                                : 'bg-gray-300 hover:bg-gray-400'
-                                        }`}
-                                        aria-label={`Voir témoignage ${index + 1}`}
-                                    />
-                                ))
-                            ) : (
-                                <>
-                                    <button className="w-8 h-2.5 mx-1 rounded-full bg-orange-500" aria-label="Voir témoignage 1" />
-                                    <button className="w-2.5 h-2.5 mx-1 rounded-full bg-gray-300" aria-label="Voir témoignage 2" />
-                                    <button className="w-2.5 h-2.5 mx-1 rounded-full bg-gray-300" aria-label="Voir témoignage 3" />
-                                    <button className="w-2.5 h-2.5 mx-1 rounded-full bg-gray-300" aria-label="Voir témoignage 4" />
-                                    <button className="w-2.5 h-2.5 mx-1 rounded-full bg-gray-300" aria-label="Voir témoignage 5" />
-                                </>
-                            )}
-                        </div>
-                        
-                        {/* Add testimonial button */}
-                        <div className="text-center mt-12">
-                            <button 
-                                onClick={() => {
-                                    // Check if user is authenticated
-                                    if (auth?.user) {
-                                        // User is logged in, show comment modal
-                                        setCommentModalOpen(true);
-                                    } else {
-                                        // User is not logged in, redirect to login page
-                                        window.location.href = route('login');
-                                    }
-                                }}
-                                className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 shadow-md font-medium"
-                            >
-                                Partagez Votre Expérience
-                            </button>
-                        </div>
-                        
-                        {/* Comment Modal */}
-                        <AnimatePresence>
-                            {commentModalOpen && (
-                                <CommentModal 
-                                    isOpen={commentModalOpen} 
-                                    onClose={() => setCommentModalOpen(false)} 
-                                    onSubmit={addComment}
-                                />
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </section>
-                
-                {/* Horaires Section - Compact version with matching background */}
-                <section className="py-12 bg-gradient-to-b from-gray-900 to-black relative overflow-hidden">
-                    {/* Background elements */}
-                    <div className="absolute top-0 right-0 w-full h-full overflow-hidden opacity-15">
-                        <svg className="absolute top-0 right-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="gridGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#f97316" stopOpacity="0.3" />
-                                    <stop offset="100%" stopColor="#ef4444" stopOpacity="0.3" />
-                                </linearGradient>
-                            </defs>
-                            {Array.from({ length: 10 }).map((_, i) => (
-                                <line key={`h-${i}`} x1="0" y1={i * 10} x2="100" y2={i * 10} stroke="url(#gridGradient)" strokeWidth="0.2" />
-                            ))}
-                            {Array.from({ length: 10 }).map((_, i) => (
-                                <line key={`v-${i}`} x1={i * 10} y1="0" x2={i * 10} y2="100" stroke="url(#gridGradient)" strokeWidth="0.2" />
-                            ))}
-                        </svg>
-                    </div>
-                    
-                    <motion.div 
-                        className="absolute -bottom-8 -left-8 w-32 h-32 bg-orange-600 rounded-full opacity-15 blur-3xl"
-                        animate={{ 
-                            scale: [1, 1.2, 1],
-                            opacity: [0.15, 0.25, 0.15]
-                        }}
-                        transition={{
-                            duration: 8,
-                            repeat: Infinity,
-                            repeatType: "reverse"
-                        }}
-                    />
-                    
-                    <div className="container mx-auto px-6 relative z-10">
-                        <div className="text-center mb-8">
-                            <SplitTextTitle text="NOS HORAIRES" color="text-orange-500" />
-                            <p className="text-gray-300 max-w-2xl mx-auto text-sm">
-                                Planifiez vos entraînements selon votre emploi du temps
-                            </p>
+                                Nous sommes à votre disposition 7 jours sur 7 avec des horaires adaptés à votre emploi du temps.
+                            </motion.p>
                         </div>
                         
                         <div className="max-w-4xl mx-auto">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Weekly Schedule Card - More compact version */}
-                                <motion.div 
-                                    initial={{ opacity: 0, y: 30 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.6 }}
-                                    viewport={{ once: true }}
-                                    className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-xl border border-orange-900/20"
-                                >
-                                    <div className="p-1">
-                                        <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-4 rounded-t-lg">
-                                            <h3 className="text-lg font-bold">Heures d'Ouverture</h3>
-                                        </div>
-                                        
-                                        <div className="p-4 space-y-2">
-                                            {[
-                                                { day: "Lundi", hours: "5:00 - 23:00" },
-                                                { day: "Mardi", hours: "5:00 - 23:00" },
-                                                { day: "Mercredi", hours: "5:00 - 23:00" },
-                                                { day: "Jeudi", hours: "5:00 - 23:00" },
-                                                { day: "Vendredi", hours: "5:00 - 23:00" },
-                                                { day: "Samedi", hours: "6:00 - 22:00" },
-                                                { day: "Dimanche", hours: "7:00 - 21:00" }
-                                            ].map((item, index) => (
-                                                <div 
-                                                    key={index} 
-                                                    className="flex justify-between py-2 border-b border-gray-700"
-                                                >
-                                                    <span className="font-medium text-white">{item.day}</span>
-                                                    <span className="text-orange-400 font-medium">{item.hours}</span>
-                                                </div>
-                                            ))}
-                                        </div>
+                            <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl shadow-2xl overflow-hidden border border-gray-800 backdrop-blur-sm">
+                                <div className="bg-gradient-to-r from-red-600 to-orange-500 px-6 md:px-10 py-6 text-white">
+                                    <div className="flex items-center space-x-3">
+                                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <h3 className="text-2xl font-bold">Heures d'ouverture</h3>
                                     </div>
-                                </motion.div>
+                                </div>
                                 
-                                {/* Special Info Card - More compact version */}
-                                <motion.div 
-                                    initial={{ opacity: 0, y: 30 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.6, delay: 0.1 }}
-                                    viewport={{ once: true }}
-                                    className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-xl border border-orange-900/20"
-                                >
-                                    <div className="p-1">
-                                        <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 px-4 rounded-t-lg">
-                                            <h3 className="text-lg font-bold">Informations Utiles</h3>
+                                <div className="p-6 md:p-10">
+                                    <motion.div 
+                                        initial={{ opacity: 0 }}
+                                        whileInView={{ opacity: 1 }}
+                                        transition={{ staggerChildren: 0.1, delayChildren: 0.3 }}
+                                        viewport={{ once: true }}
+                                        className="grid grid-cols-1 md:grid-cols-2 gap-8"
+                                    >
+                                        {/* Left column with weekdays */}
+                                        <motion.div
+                                            initial={{ y: 20, opacity: 0 }}
+                                            whileInView={{ y: 0, opacity: 1 }}
+                                            transition={{ duration: 0.6 }}
+                                            viewport={{ once: true }}
+                                            className="border-l-4 border-orange-500 pl-6 py-2"
+                                        >
+                                            <h4 className="text-xl font-bold text-white mb-4">En semaine</h4>
+                                            <div className="space-y-4">
+                                                <div className="flex justify-between items-center">
+                                                    <div className="flex items-center">
+                                                        <span className="w-3 h-3 rounded-full bg-orange-500 mr-3"></span>
+                                                        <span className="text-gray-300 font-medium">Lundi - Vendredi</span>
+                                                    </div>
+                                                    <div className="bg-gradient-to-r from-orange-500 to-red-500 px-4 py-1 rounded-full text-white font-bold">
+                                                        5:00 - 23:00
+                                                    </div>
+                                                </div>
+                                                <p className="text-sm text-gray-400 ml-6">
+                                                    Personnel disponible: 6:00 - 22:00
+                                                </p>
+                                                <div className="flex items-center space-x-2 ml-6">
+                                                    <span className="inline-block px-3 py-1 bg-gray-800 text-gray-300 text-xs font-medium rounded-full border border-gray-700">
+                                                        Classes matinales
+                                                    </span>
+                                                    <span className="inline-block px-3 py-1 bg-gray-800 text-gray-300 text-xs font-medium rounded-full border border-gray-700">
+                                                        Sessions du soir
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                        
+                                        {/* Right column with weekend */}
+                                        <motion.div
+                                            initial={{ y: 20, opacity: 0 }}
+                                            whileInView={{ y: 0, opacity: 1 }}
+                                            transition={{ duration: 0.6, delay: 0.2 }}
+                                            viewport={{ once: true }}
+                                            className="border-l-4 border-gray-700 pl-6 py-2"
+                                        >
+                                            <h4 className="text-xl font-bold text-white mb-4">Week-end</h4>
+                                            <div className="space-y-4">
+                                                <div className="flex justify-between items-center">
+                                                    <div className="flex items-center">
+                                                        <span className="w-3 h-3 rounded-full bg-gray-600 mr-3"></span>
+                                                        <span className="text-gray-300 font-medium">Samedi</span>
+                                                    </div>
+                                                    <div className="bg-gray-800 px-4 py-1 rounded-full text-white font-bold">
+                                                        6:00 - 22:00
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-between items-center mt-4">
+                                                    <div className="flex items-center">
+                                                        <span className="w-3 h-3 rounded-full bg-gray-600 mr-3"></span>
+                                                        <span className="text-gray-300 font-medium">Dimanche</span>
+                                                    </div>
+                                                    <div className="bg-gray-800 px-4 py-1 rounded-full text-white font-bold">
+                                                        7:00 - 21:00
+                                                    </div>
+                                                </div>
+                                                <p className="text-sm text-gray-400 ml-6">
+                                                    Personnel disponible: 8:00 - 20:00
+                                                </p>
+                                                <div className="flex items-center space-x-2 ml-6">
+                                                    <span className="inline-block px-3 py-1 bg-gray-800 text-gray-300 text-xs font-medium rounded-full border border-gray-700">
+                                                        Classes spéciales
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    </motion.div>
+                                    
+                                    <div className="mt-8 pt-6 border-t border-gray-800">
+                                        <div className="flex items-start">
+                                            <svg className="w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"></path>
+                                            </svg>
+                                            <p className="ml-3 text-sm text-gray-400">
+                                                Les horaires peuvent être modifiés pendant les jours fériés. Consultez notre <a href="#" className="text-gray-300 hover:text-white font-medium">calendrier spécial</a> pour plus d'informations.
+                                            </p>
                                         </div>
                                         
-                                        <div className="p-4 space-y-3">
-                                            <div className="flex items-start space-x-3">
-                                                <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
-                                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <h4 className="text-base font-medium text-white">Heures de pointe</h4>
-                                                    <p className="text-gray-300 text-sm">17:00 - 20:00 en semaine</p>
-                                                </div>
-                                            </div>
-                                            
-                                            <div className="flex items-start space-x-3">
-                                                <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
-                                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <h4 className="text-base font-medium text-white">Accès membres</h4>
-                                                    <p className="text-gray-300 text-sm">Accès 24/7 pour Premium et Élite</p>
-                                                </div>
-                                            </div>
+                                        <div className="mt-6 flex justify-center">
+                                            <Link
+                                                href={route('register')}
+                                                className="inline-block px-6 py-3 bg-gray-800 text-white font-medium rounded-lg hover:bg-gray-700 transition-all duration-300 shadow-lg transform hover:scale-105"
+                                            >
+                                                Réserver une session
+                                            </Link>
                                         </div>
                                     </div>
-                                </motion.div>
+                                </div>
                             </div>
                         </div>
                     </div>

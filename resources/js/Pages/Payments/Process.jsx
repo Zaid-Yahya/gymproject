@@ -5,7 +5,7 @@ import PaymentMethodCard from './Components/PaymentMethodCard';
 import CardForm from './Components/CardForm';
 import OrderSummary from './Components/OrderSummary';
 import BackgroundAnimation from './Components/BackgroundAnimation';
-import Navbar from '../Subscriptions/Navbar';
+import Navbar from '@/Components/Navbar';
 
 export default function Process({ subscription, paymentMethods, auth }) {
     const [selectedMethod, setSelectedMethod] = useState('paypal');
@@ -35,18 +35,18 @@ export default function Process({ subscription, paymentMethods, auth }) {
             {/* Background animation with lower z-index */}
             <div className="background-wrapper">
                 <BackgroundAnimation />
-                    </div>
+            </div>
 
             {/* Navbar with higher z-index */}
             <div className="navbar-wrapper">
-                <Navbar user={auth.user} />
-                                    </div>
+                <Navbar />
+            </div>
                                     
             <div className="payment-container">
                 <div className="payment-header">
                     <h2>Complete Payment</h2>
                     <p>Secure checkout for your subscription</p>
-                                    </div>
+                </div>
                                     
                 <div className="payment-content">
                     <div className="payment-methods">
@@ -69,27 +69,27 @@ export default function Process({ subscription, paymentMethods, auth }) {
                                     setData={setData}
                                     errors={errors}
                                 />
-                                    )}
+                            )}
                                     
-                                    {selectedMethod === 'paypal' && (
+                            {selectedMethod === 'paypal' && (
                                 <div className="info-box paypal">
                                     <p>You will be redirected to PayPal to complete your payment.</p>
-                                        </div>
-                                    )}
+                                </div>
+                            )}
                                     
-                                    {selectedMethod === 'bank_transfer' && (
+                            {selectedMethod === 'bank_transfer' && (
                                 <div className="info-box bank">
                                     <p>You'll receive bank transfer instructions after proceeding.</p>
-                                    </div>
-                                )}
+                                </div>
+                            )}
 
-                                <button
-                                    type="submit"
-                                    disabled={processing}
+                            <button
+                                type="submit"
+                                disabled={processing}
                                 className="payment-button"
-                                >
-                                            {processing ? 'Processing...' : `Pay $${subscription.price}`}
-                                </button>
+                            >
+                                {processing ? 'Processing...' : `Pay $${subscription.price}`}
+                            </button>
                         </form>
                     </div>
                     
@@ -98,8 +98,8 @@ export default function Process({ subscription, paymentMethods, auth }) {
                 
                 <div className="payment-footer">
                     <Link href={route('subscriptions.plans')} className="back-link">
-                                                Return to plans
-                                            </Link>
+                        Return to plans
+                    </Link>
                     
                     <div className="secure-badge">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lock-icon">
@@ -131,7 +131,7 @@ export default function Process({ subscription, paymentMethods, auth }) {
                     flex-direction: column;
                     position: relative;
                     overflow: hidden;
-                    background: linear-gradient(135deg, #9a0000 0%, #c42727 100%);
+                    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
                     padding: 0;
                 }
                 
@@ -157,12 +157,13 @@ export default function Process({ subscription, paymentMethods, auth }) {
                     background: rgba(255, 255, 255, 0.95);
                     backdrop-filter: blur(10px);
                     border-radius: 12px;
-                    box-shadow: 0 10px 30px rgba(255, 126, 103, 0.25);
+                    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.3);
                     padding: 1.5rem;
                     position: relative;
                     z-index: 10;
-                    border: 1px solid rgba(255, 126, 103, 0.1);
+                    border: 1px solid rgba(249, 115, 22, 0.2);
                     animation: fadeInUp 0.6s ease-out forwards;
+                    margin-top: 7rem;
                 }
                 
                 @keyframes fadeInUp {
@@ -184,7 +185,7 @@ export default function Process({ subscription, paymentMethods, auth }) {
                 .payment-header h2 {
                     font-size: 1.5rem;
                     font-weight: 600;
-                    color: #9a0000;
+                    color: #f97316;
                     margin: 0;
                     position: relative;
                     display: inline-block;
@@ -197,7 +198,7 @@ export default function Process({ subscription, paymentMethods, auth }) {
                     left: 0;
                     width: 100%;
                     height: 2px;
-                    background: linear-gradient(to right, transparent, #9a0000, transparent);
+                    background: linear-gradient(to right, transparent, #f97316, transparent);
                 }
                 
                 .payment-header p {
@@ -236,7 +237,7 @@ export default function Process({ subscription, paymentMethods, auth }) {
                     font-size: 1.1rem;
                     font-weight: 600;
                     margin: 0 0 1.25rem;
-                    color: #9a0000;
+                    color: #f97316;
                     position: relative;
                     display: inline-block;
                 }
@@ -248,7 +249,7 @@ export default function Process({ subscription, paymentMethods, auth }) {
                     left: 0;
                     width: 100%;
                     height: 2px;
-                    background: linear-gradient(to right, #9a0000, transparent);
+                    background: linear-gradient(to right, #f97316, transparent);
                 }
                 
                 .methods-grid {
@@ -275,30 +276,30 @@ export default function Process({ subscription, paymentMethods, auth }) {
                     content: "";
                     width: 24px;
                     height: 24px;
-                    background-color: rgba(154, 0, 0, 0.1);
+                    background-color: rgba(249, 115, 22, 0.1);
                     border-radius: 50%;
                     margin-right: 12px;
-                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239a0000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='12' y1='16' x2='12' y2='12'%3E%3C/line%3E%3Cline x1='12' y1='8' x2='12.01' y2='8'%3E%3C/line%3E%3C/svg%3E");
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23f97316' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='12' y1='16' x2='12' y2='12'%3E%3C/line%3E%3Cline x1='12' y1='8' x2='12.01' y2='8'%3E%3C/line%3E%3C/svg%3E");
                     background-repeat: no-repeat;
                     background-position: center;
                     flex-shrink: 0;
                 }
                 
                 .info-box.paypal {
-                    background-color: #fff5f5;
-                    border: 1px solid #ffece9;
-                    color: #9a0000;
+                    background-color: #fff8f5;
+                    border: 1px solid #ffede5;
+                    color: #f97316;
                 }
                 
                 .info-box.bank {
-                    background-color: #fff5f5;
-                    border: 1px solid #ffece9;
-                    color: #9a0000;
+                    background-color: #fff8f5;
+                    border: 1px solid #ffede5;
+                    color: #f97316;
                 }
                 
                 .payment-button {
                     width: 100%;
-                    background: linear-gradient(45deg, #9a0000, #c42727);
+                    background: linear-gradient(45deg, #f97316, #fb923c);
                     color: white;
                     border: none;
                     border-radius: 8px;
@@ -307,7 +308,7 @@ export default function Process({ subscription, paymentMethods, auth }) {
                     font-size: 1rem;
                     cursor: pointer;
                     transition: all 0.3s ease;
-                    box-shadow: 0 2px 5px rgba(154, 0, 0, 0.3);
+                    box-shadow: 0 2px 5px rgba(249, 115, 22, 0.3);
                     position: relative;
                     overflow: hidden;
                     margin-top: 0.5rem;
@@ -331,8 +332,8 @@ export default function Process({ subscription, paymentMethods, auth }) {
                 
                 .payment-button:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 10px rgba(154, 0, 0, 0.4);
-                    background: linear-gradient(45deg, #8a0000, #b52020);
+                    box-shadow: 0 4px 10px rgba(249, 115, 22, 0.4);
+                    background: linear-gradient(45deg, #ea580c, #f97316);
                 }
                 
                 .payment-button:hover:before {
@@ -350,7 +351,7 @@ export default function Process({ subscription, paymentMethods, auth }) {
                     align-items: center;
                     margin-top: 1.5rem;
                     padding-top: 1rem;
-                    border-top: 1px solid #ffece9;
+                    border-top: 1px solid #ffede5;
                     animation: fadeIn 0.8s ease-out forwards;
                     animation-delay: 0.4s;
                     opacity: 0;
@@ -372,7 +373,7 @@ export default function Process({ subscription, paymentMethods, auth }) {
                 }
                 
                 .back-link:hover {
-                    color: #9a0000;
+                    color: #f97316;
                 }
                 
                 .back-link:hover:before {
@@ -382,7 +383,7 @@ export default function Process({ subscription, paymentMethods, auth }) {
                 .secure-badge {
                     display: flex;
                     align-items: center;
-                    color: #9a0000;
+                    color: #f97316;
                     font-size: 0.75rem;
                     font-weight: 500;
                 }
@@ -415,7 +416,7 @@ export default function Process({ subscription, paymentMethods, auth }) {
                 .card-floater {
                     width: 120px;
                     height: 120px;
-                    background: rgba(154, 0, 0, 0.2);
+                    background: rgba(249, 115, 22, 0.2);
                     top: 20%;
                     left: 15%;
                     animation-name: float1;
@@ -424,7 +425,7 @@ export default function Process({ subscription, paymentMethods, auth }) {
                 .coin-floater {
                     width: 80px;
                     height: 80px;
-                    background: rgba(154, 0, 0, 0.15);
+                    background: rgba(249, 115, 22, 0.15);
                     top: 60%;
                     right: 20%;
                     animation-name: float2;
@@ -433,7 +434,7 @@ export default function Process({ subscription, paymentMethods, auth }) {
                 .secure-floater {
                     width: 100px;
                     height: 100px;
-                    background: rgba(154, 0, 0, 0.1);
+                    background: rgba(249, 115, 22, 0.1);
                     bottom: 10%;
                     left: 30%;
                     animation-name: float3;
@@ -466,12 +467,12 @@ export default function Process({ subscription, paymentMethods, auth }) {
                     transform: translateX(-50%);
                     display: flex;
                     align-items: center;
-                    background: rgba(255, 126, 103, 0.05);
+                    background: rgba(249, 115, 22, 0.05);
                     padding: 0.5rem 0.75rem;
                     border-radius: 4px;
                     font-size: 0.75rem;
                     color: #666;
-                    border: 1px solid rgba(255, 126, 103, 0.1);
+                    border: 1px solid rgba(249, 115, 22, 0.1);
                     z-index: 10;
                 }
                 
@@ -479,7 +480,7 @@ export default function Process({ subscription, paymentMethods, auth }) {
                     width: 14px;
                     height: 14px;
                     margin-right: 6px;
-                    color: #9a0000;
+                    color: #f97316;
                 }
                 
                 @media (max-width: 768px) {

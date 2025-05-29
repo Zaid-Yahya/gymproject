@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from '@inertiajs/react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, usePage } from '@inertiajs/react';
 
 export default function Navbar({ activeSection = 'hero' }) {
+    const { auth } = usePage().props;
     const [navVisible, setNavVisible] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
     // Handle navigation visibility on scroll
     useEffect(() => {
@@ -13,6 +16,20 @@ export default function Navbar({ activeSection = 'hero' }) {
         
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
     }, []);
 
     const scrollToSection = (sectionId) => {
@@ -25,6 +42,18 @@ export default function Navbar({ activeSection = 'hero' }) {
                 behavior: 'smooth'
             });
         }
+    };
+
+    // Get user initials for avatar
+    const getUserInitials = () => {
+        if (!auth?.user?.name) return '?';
+        
+        const nameParts = auth.user.name.split(' ');
+        if (nameParts.length >= 2) {
+            return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
+        }
+        
+        return auth.user.name.charAt(0).toUpperCase();
     };
 
     return (
@@ -93,18 +122,69 @@ export default function Navbar({ activeSection = 'hero' }) {
                     
                     {/* Authentication Links */}
                     <div className="hidden md:flex items-center space-x-4">
-                        <Link 
-                            href={route('login')} 
-                            className="px-4 py-2 transition-all duration-300 text-gray-300 hover:text-orange-400"
-                        >
-                            Connexion
-                        </Link>
-                        <Link 
-                            href={route('register')} 
-                            className="px-6 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 hover:scale-105 transform shadow-md hover:shadow-orange-500/30"
-                        >
-                            Rejoindre
-                        </Link>
+                        {auth?.user ? (
+                            <div className="relative" ref={dropdownRef}>
+                                <button 
+                                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                                    className="flex items-center focus:outline-none"
+                                >
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center text-white font-bold text-sm shadow-lg border-2 border-orange-500 hover:scale-105 transition-transform duration-300">
+                                        {auth.user.avatar ? (
+                                            <img 
+                                                src={auth.user.avatar} 
+                                                alt={auth.user.name} 
+                                                className="w-full h-full rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            getUserInitials()
+                                        )}
+                                    </div>
+                                    <svg className="w-4 h-4 ml-1 text-gray-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                </button>
+                                
+                                {dropdownOpen && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-black border border-gray-800 rounded-md overflow-hidden shadow-xl z-50">
+                                        <div className="px-4 py-3 border-b border-gray-800">
+                                            <p className="text-sm text-white font-medium">{auth.user.name}</p>
+                                            <p className="text-xs text-gray-400 truncate">{auth.user.email}</p>
+                                        </div>
+                                        
+                                        <Link 
+                                            href={route('profile.edit')}
+                                            className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-orange-400"
+                                        >
+                                            Modifier Profil
+                                        </Link>
+                                        
+                                        <Link 
+                                            href={route('logout')} 
+                                            method="post" 
+                                            as="button"
+                                            className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-orange-400"
+                                        >
+                                            Déconnexion
+                                        </Link>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <>
+                                <Link 
+                                    href={route('login')} 
+                                    className="px-4 py-2 transition-all duration-300 text-gray-300 hover:text-orange-400"
+                                >
+                                    Connexion
+                                </Link>
+                                <Link 
+                                    href={route('register')} 
+                                    className="px-6 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 hover:scale-105 transform shadow-md hover:shadow-orange-500/30"
+                                >
+                                    Rejoindre
+                                </Link>
+                            </>
+                        )}
                     </div>
                     
                     {/* Mobile menu button */}
@@ -175,19 +255,61 @@ export default function Navbar({ activeSection = 'hero' }) {
                         >
                             ABONNEMENTS
                         </Link>
+                        
+                        {/* Mobile authentication links */}
                         <div className="pt-2 flex flex-col space-y-3 px-4">
-                            <Link 
-                                href={route('login')} 
-                                className="py-2 text-gray-300 hover:text-orange-400 transition-all duration-300"
-                            >
-                                Connexion
-                            </Link>
-                            <Link 
-                                href={route('register')} 
-                                className="py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-center rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300"
-                            >
-                                Rejoindre
-                            </Link>
+                            {auth?.user ? (
+                                <div className="border-t border-gray-800 pt-3">
+                                    <div className="flex items-center space-x-3 mb-3">
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center text-white font-bold shadow-lg">
+                                            {auth.user.avatar ? (
+                                                <img 
+                                                    src={auth.user.avatar} 
+                                                    alt={auth.user.name} 
+                                                    className="w-full h-full rounded-full object-cover"
+                                                />
+                                            ) : (
+                                                getUserInitials()
+                                            )}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-white font-medium">{auth.user.name}</p>
+                                            <p className="text-xs text-gray-400 truncate">{auth.user.email}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <Link 
+                                        href={route('profile.edit')}
+                                        className="block py-2 text-gray-300 hover:text-orange-400 transition-all duration-300"
+                                    >
+                                        Modifier Profil
+                                    </Link>
+                                    
+                                    <Link 
+                                        href={route('logout')} 
+                                        method="post" 
+                                        as="button"
+                                        className="block w-full text-left py-2 text-gray-300 hover:text-orange-400 transition-all duration-300"
+                                    >
+                                        Déconnexion
+                                    </Link>
+                                </div>
+                            ) : (
+                                <>
+                                    <Link 
+                                        href={route('login')} 
+                                        className="py-2 text-gray-300 hover:text-orange-400 transition-all duration-300"
+                                    >
+                                        Connexion
+                                    </Link>
+                                    <Link 
+                                        href={route('register')} 
+                                        className="py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-center rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300"
+                                    >
+                                        Rejoindre
+                                    </Link>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>

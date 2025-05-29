@@ -14,8 +14,14 @@ class Payment extends Model
         'subscription_id',
         'amount',
         'payment_method',
+        'payment_id',
         'transaction_id',
         'status',
+        'details',
+    ];
+
+    protected $casts = [
+        'details' => 'array',
     ];
 
     public function user()
@@ -26,5 +32,37 @@ class Payment extends Model
     public function subscription()
     {
         return $this->belongsTo(Subscription::class);
+    }
+    
+    /**
+     * Scope a query to only include completed payments.
+     */
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'completed');
+    }
+    
+    /**
+     * Scope a query to only include failed payments.
+     */
+    public function scopeFailed($query)
+    {
+        return $query->where('status', 'failed');
+    }
+    
+    /**
+     * Check if payment was successful
+     */
+    public function isSuccessful()
+    {
+        return $this->status === 'completed';
+    }
+    
+    /**
+     * Check if payment failed
+     */
+    public function hasFailed()
+    {
+        return $this->status === 'failed';
     }
 } 

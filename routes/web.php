@@ -16,10 +16,36 @@ Route::get('/', function () {
         ->latest()
         ->take(10)
         ->get();
-
-    return Inertia::render('Home', [
+        
+    $data = [
         'comments' => $comments
-    ]);
+    ];
+    
+    // Add subscription info for authenticated users
+    if (auth()->check()) {
+        $subscriptionController = app(SubscriptionController::class);
+        $activeSubscription = auth()->user()->subscriptions()
+            ->where('status', 'active')
+            ->latest()
+            ->first();
+            
+        $data['activeSubscription'] = $activeSubscription;
+        $data['hasActiveSubscription'] = !is_null($activeSubscription);
+        
+        // If subscription exists, add remaining days info
+        if ($activeSubscription) {
+            $endDate = \Carbon\Carbon::parse($activeSubscription->end_date);
+            $daysRemaining = now()->diffInDays($endDate);
+            $activeSubscription->remaining_days = $daysRemaining;
+            
+            // Calculate percentage of subscription used
+            $totalDays = \Carbon\Carbon::parse($activeSubscription->start_date)->diffInDays($endDate);
+            $percentUsed = ($totalDays - $daysRemaining) / max(1, $totalDays) * 100;
+            $activeSubscription->percent_used = min(100, max(0, round($percentUsed)));
+        }
+    }
+
+    return Inertia::render('Home', $data);
 })->name('home');
 
 Route::get('/dashboard', function () {
@@ -30,14 +56,16 @@ Route::middleware(['auth'])->group(function () {
     // Subscription routes
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
     Route::get('/subscriptions/plans', [SubscriptionController::class, 'plans'])->name('subscriptions.plans');
-    Route::post('/subscriptions/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
+    Route::post('/subscriptions/create-pending', [SubscriptionController::class, 'createPendingSubscription'])->name('subscriptions.createPending');
+    Route::post('/subscriptions/complete/{subscription}', [SubscriptionController::class, 'completeSubscription'])->name('subscriptions.complete');
+    Route::post('/subscriptions/upgrade', [SubscriptionController::class, 'upgrade'])->name('subscriptions.upgrade');
     Route::post('/subscriptions/{subscription}/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
-    Route::post('/subscriptions/{subscription}/renew', [SubscriptionController::class, 'renew'])->name('subscriptions.renew');
 
     // Payment routes
     Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
     Route::get('/payments/{subscription}/process', [PaymentController::class, 'process'])->name('payment.process');
     Route::post('/payments/{subscription}', [PaymentController::class, 'store'])->name('payment.store');
+    Route::post('/payments/{subscription}/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
 
     // Discount routes
     Route::get('/discounts', [DiscountController::class, 'index'])->name('discounts.index');

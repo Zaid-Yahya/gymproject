@@ -9,7 +9,27 @@ export default function Register() {
         email: '',
         password: '',
         password_confirmation: '',
+        image: null,
     });
+
+    // State for image preview
+    const [imagePreview, setImagePreview] = useState(null);
+
+    // Handle image selection
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        setData('image', file);
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setImagePreview(null);
+        }
+    };
 
     // Refs for interactive background
     const canvasRef = useRef(null);
@@ -184,6 +204,48 @@ export default function Register() {
                                 required
                             />
                             <InputError message={errors.email} className="mt-1" />
+                        </div>
+
+                        <div className="mb-4">
+                            <label htmlFor="image" className="block text-gray-700 font-medium mb-1">
+                                Profile Image
+                            </label>
+                            <div className="flex items-center space-x-4">
+                                <div className="flex-shrink-0">
+                                    {imagePreview ? (
+                                        <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-red-500">
+                                            <img src={imagePreview} alt="Profile Preview" className="w-full h-full object-cover" />
+                                        </div>
+                                    ) : (
+                                        <div className="w-20 h-20 rounded-full bg-gray-200 border-2 border-gray-300 flex items-center justify-center text-gray-400">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex-1">
+                                    <input
+                                        id="image"
+                                        type="file"
+                                        name="image"
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                        className="hidden"
+                                    />
+                                    <label
+                                        htmlFor="image"
+                                        className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        Choose Image
+                                    </label>
+                                    <p className="mt-1 text-xs text-gray-500">JPG, PNG, JPEG, GIF up to 2MB</p>
+                                </div>
+                            </div>
+                            <InputError message={errors.image} className="mt-1" />
                         </div>
 
                         <div className="mb-4">

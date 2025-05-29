@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Navbar from './Navbar';
+import Navbar from '@/Components/Navbar';
 import PageTransition from '@/Components/PageTransition';
 
 // Dynamic background with animated gradient and design elements
@@ -219,41 +219,55 @@ export default function Index({ subscriptions, hasActiveSubscription, auth }) {
             <DynamicBackground />
             
             {/* Navbar */}
-            <Navbar user={auth.user} />
+            <Navbar />
             
             <PageTransition variant="fadeScale">
-                <div className="pt-20 pb-12 min-h-screen">
+                <div className="pt-32 pb-12 min-h-screen">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        {/* Header with added text */}
-                        <div className="mb-10">
+                        {/* Enhanced Header with visual elements */}
+                        <div className="mb-16">
                             <motion.div 
                                 initial={{ opacity: 0, y: -20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.4 }}
                             >
-                                <div className="text-center mb-8">
-                                    <h1 className="text-4xl font-bold text-gray-900 mb-2">My Subscriptions</h1>
-                                    <p className="text-gray-600 max-w-2xl mx-auto">
-                                        Track and manage all your POWER GYM memberships. View your active subscriptions, 
-                                        check payment history, and make changes to your plans.
-                                    </p>
-                                </div>
-                                
-                                <div className="flex justify-end mb-6">
-                                    <motion.div
-                                        whileHover={{ scale: 1.03 }}
-                                        whileTap={{ scale: 0.97 }}
-                                    >
-                                        <Link
-                                            href={route('subscriptions.plans')}
-                                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                            </svg>
-                                            New Subscription
-                                        </Link>
-                                    </motion.div>
+                                <div className="relative bg-gradient-to-br from-gray-900 to-black rounded-2xl overflow-hidden shadow-2xl p-10 mb-8">
+                                    {/* Abstract shape decorations */}
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-red-600 opacity-10 rounded-full transform translate-x-1/3 -translate-y-1/3"></div>
+                                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-500 opacity-10 rounded-full transform -translate-x-1/3 translate-y-1/3"></div>
+                                    
+                                    {/* Diagonal line decorations */}
+                                    <div className="absolute inset-0 opacity-20">
+                                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-transparent"></div>
+                                        <div className="absolute top-0 left-0 h-full w-1 bg-gradient-to-b from-red-500 to-transparent"></div>
+                                    </div>
+                                    
+                                    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between">
+                                        <div className="text-center md:text-left mb-8 md:mb-0">
+                                            <div className="inline-block px-3 py-1 bg-red-600 bg-opacity-20 rounded-full text-red-400 text-sm font-semibold mb-4">POWER GYM MEMBERSHIP</div>
+                                            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">Turn <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Subscriptions</span><br />Into <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Strength</span></h1>
+                                            <p className="text-gray-300 max-w-lg">
+                                                Your active memberships fuel your transformation journey. 
+                                                Each plan brings you closer to the powerful version of yourself you're working to become.
+                                            </p>
+                                        </div>
+                                        
+                                        <div className="flex-shrink-0 relative">
+                                            <div className="w-64 h-64 rounded-full bg-gradient-to-br from-orange-500 to-red-600 p-1">
+                                                <div className="w-full h-full rounded-full overflow-hidden border-2 border-white border-opacity-30">
+                                                    <img 
+                                                        src="https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800&q=80" 
+                                                        alt="Fitness Motivation" 
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Decorative floating elements */}
+                                            <div className="absolute -top-4 -right-4 w-12 h-12 bg-yellow-500 bg-opacity-80 rounded-xl transform rotate-12 shadow-lg"></div>
+                                            <div className="absolute -bottom-6 left-6 w-8 h-8 bg-red-600 rounded-lg transform -rotate-12 shadow-lg"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </motion.div>
                         </div>

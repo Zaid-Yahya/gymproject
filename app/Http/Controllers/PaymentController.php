@@ -28,6 +28,8 @@ class PaymentController extends Controller
                 ->with('error', 'This subscription is already processed.');
         }
 
+        $paymentContext = $subscription->is_upgrade ? 'upgrade' : 'new subscription';
+
         // Get available payment methods
         $paymentMethods = [
             [
@@ -53,6 +55,8 @@ class PaymentController extends Controller
         return Inertia::render('Payments/Process', [
             'subscription' => $subscription->load('discount'),
             'paymentMethods' => $paymentMethods,
+            'paymentContext' => $paymentContext,
+            'isUpgrade' => $subscription->is_upgrade,
         ]);
     }
 
@@ -80,24 +84,44 @@ class PaymentController extends Controller
             
             // Generate a fake transaction ID for demo purposes
             $transactionId = 'TRANS_' . uniqid() . '_' . strtoupper(substr(md5($subscription->id . time()), 0, 8));
+
+            // Call the SubscriptionController to complete the subscription
+            $subscriptionController = app(SubscriptionController::class);
             
-            // Create the payment record
-            $payment = $subscription->payments()->create([
-                'user_id' => auth()->id(),
-                'amount' => $subscription->price,
-                'payment_method' => $request->payment_method,
-                'status' => 'completed',
-                'transaction_id' => $transactionId,
-            ]);
-
-            // Activate the subscription
-            $subscription->update(['status' => 'active']);
-
-            return redirect()->route('subscriptions.index')
-                ->with('success', 'Payment processed successfully! Your subscription is now active.');
+            return $subscriptionController->completeSubscription(
+                $subscription, 
+                new Request([
+                    'payment_success' => true,
+                    'payment_id' => $transactionId,
+                ])
+            );
+            
         } catch (\Exception $e) {
+            // Log the error
+            \Log::error('Payment processing failed: ' . $e->getMessage());
+            
+            // Mark the subscription as failed
+            $subscription->update(['status' => 'failed']);
+            
             return redirect()->back()
                 ->with('error', 'Payment failed. Please try again or contact support.');
         }
+    }
+    
+    public function cancel(Subscription $subscription)
+    {
+        if ($subscription->user_id !== auth()->id()) {
+            abort(403);
+        }
+        
+        if ($subscription->status !== 'pending') {
+            return redirect()->route('subscriptions.index')
+                ->with('error', 'Only pending subscriptions can be cancelled.');
+        }
+        
+        $subscription->update(['status' => 'cancelled']);
+        
+        return redirect()->route('subscriptions.plans')
+            ->with('success', 'Your subscription process has been cancelled.');
     }
 } 
