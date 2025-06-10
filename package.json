@@ -23,6 +23,7 @@
     "dependencies": {
         "@heroicons/react": "^2.2.0",
         "@stripe/stripe-js": "^7.1.0",
+        "date-fns": "^4.1.0",
         "framer-motion": "^12.11.3",
         "react-helmet": "^6.1.0",
         "recharts": "^2.15.3"

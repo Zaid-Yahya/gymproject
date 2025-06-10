@@ -118,6 +118,34 @@ export default function Navbar({ activeSection = 'hero' }) {
                         >
                             ABONNEMENTS
                         </Link>
+                        {auth?.user?.is_admin && (
+                            <>
+                                <Link 
+                                    href={route('users.index')}
+                                    className={`text-sm font-medium transition-all duration-300 ${
+                                        route().current('users.index') ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
+                                    }`}
+                                >
+                                    Users
+                                </Link>
+                                <Link 
+                                    href={route('subscriptions.index')}
+                                    className={`text-sm font-medium transition-all duration-300 ${
+                                        route().current('subscriptions.index') ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
+                                    }`}
+                                >
+                                    Subscriptions
+                                </Link>
+                                <Link 
+                                    href={route('discounts.index')}
+                                    className={`text-sm font-medium transition-all duration-300 ${
+                                        route().current('discounts.index') ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
+                                    }`}
+                                >
+                                    Promo Codes
+                                </Link>
+                            </>
+                        )}
                     </div>
                     
                     {/* Authentication Links */}
@@ -255,6 +283,34 @@ export default function Navbar({ activeSection = 'hero' }) {
                         >
                             ABONNEMENTS
                         </Link>
+                        {auth?.user?.is_admin && (
+                            <>
+                                <Link 
+                                    href={route('users.index')}
+                                    className={`text-sm font-medium py-2 px-4 transition-all duration-300 ${
+                                        route().current('users.index') ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
+                                    }`}
+                                >
+                                    Users
+                                </Link>
+                                <Link 
+                                    href={route('subscriptions.index')}
+                                    className={`text-sm font-medium py-2 px-4 transition-all duration-300 ${
+                                        route().current('subscriptions.index') ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
+                                    }`}
+                                >
+                                    Subscriptions
+                                </Link>
+                                <Link 
+                                    href={route('discounts.index')}
+                                    className={`text-sm font-medium py-2 px-4 transition-all duration-300 ${
+                                        route().current('discounts.index') ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
+                                    }`}
+                                >
+                                    Promo Codes
+                                </Link>
+                            </>
+                        )}
                         
                         {/* Mobile authentication links */}
                         <div className="pt-2 flex flex-col space-y-3 px-4">

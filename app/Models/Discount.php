@@ -11,21 +11,18 @@ class Discount extends Model
 
     protected $fillable = [
         'code',
-        'name',
-        'description',
         'type',
         'value',
-        'valid_from',
-        'valid_until',
-        'usage_limit',
-        'used_count',
-        'is_active',
+        'max_uses',
+        'expires_at',
+        'uses',
+        'status',
     ];
 
     protected $casts = [
-        'valid_from' => 'date',
-        'valid_until' => 'date',
-        'is_active' => 'boolean',
+        'expires_at' => 'datetime',
+        'max_uses' => 'integer',
+        'uses' => 'integer',
     ];
 
     public function subscriptions()
@@ -36,22 +33,18 @@ class Discount extends Model
     public function isValid()
     {
         // Check if discount is active
-        if (!$this->is_active) {
+        if ($this->status === 'cancelled') {
             return false;
         }
 
         // Check if within date range
         $now = now();
-        if ($now < $this->valid_from) {
-            return false;
-        }
-        
-        if ($this->valid_until && $now > $this->valid_until) {
+        if ($this->expires_at && $now->greaterThan($this->expires_at)) {
             return false;
         }
 
         // Check if usage limit reached
-        if ($this->usage_limit && $this->used_count >= $this->usage_limit) {
+        if ($this->max_uses !== null && $this->uses >= $this->max_uses) {
             return false;
         }
 

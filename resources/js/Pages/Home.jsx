@@ -1483,6 +1483,133 @@ export default function Home({ comments: initialComments, auth, activeSubscripti
                     </div>
                 </section>
 
+                {/* BMI Section - Styled to match the dark theme */}
+                <section className="py-20 relative overflow-hidden bg-gradient-to-b from-gray-900 via-black to-gray-900">
+                    {/* Background elements */}
+                    <div className="absolute -top-40 -left-20 w-80 h-80 bg-gray-800 rounded-full opacity-10 blur-3xl animate-pulse-slow"></div>
+                    <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-gray-800 rounded-full opacity-10 blur-3xl animate-pulse-slow"></div>
+                    <div className="absolute inset-0 bg-pattern-overlay opacity-5"></div>
+                    
+                    <div className="container mx-auto px-6 relative z-10">
+                        <div className="text-center mb-12">
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8 }}
+                                viewport={{ once: true }}
+                                className="mb-6"
+                            >
+                                <h2 className="text-4xl md:text-5xl font-bold mb-2">
+                                    <span className="text-white">CALCULATEUR D'<span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">IMC</span></span>
+                                </h2>
+                                <div className="h-1 w-24 bg-gradient-to-r from-orange-400 to-red-500 mx-auto"></div>
+                            </motion.div>
+                            <motion.p 
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.2 }}
+                                viewport={{ once: true }}
+                                className="text-gray-300 max-w-2xl mx-auto"
+                            >
+                                Découvrez votre indice de masse corporelle et obtenez des recommandations personnalisées pour atteindre vos objectifs fitness.
+                            </motion.p>
+                        </div>
+
+                        <div className="max-w-4xl mx-auto">
+                            <div className="bg-gradient-to-br from-gray-900 to-black rounded-2xl shadow-2xl overflow-hidden border border-gray-800 backdrop-blur-sm">
+                                <div className="bg-gradient-to-r from-red-600 to-orange-500 px-6 md:px-10 py-6 text-white">
+                                    <div className="flex items-center space-x-3">
+                                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <h3 className="text-2xl font-bold">Calculez votre IMC</h3>
+                                    </div>
+                                </div>
+
+                                <div className="p-6 md:p-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <motion.div
+                                            initial={{ opacity: 0, x: -20 }}
+                                            whileInView={{ opacity: 1, x: 0 }}
+                                            transition={{ duration: 0.6 }}
+                                            viewport={{ once: true }}
+                                            className="space-y-6"
+                                        >
+                                            <div className="space-y-4">
+                                                <motion.div 
+                                                    className="flex items-center space-x-3 p-3 rounded-lg bg-gray-800/50 hover:bg-gray-800 transition-colors duration-300"
+                                                    whileHover={{ x: 5 }}
+                                                >
+                                                    <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
+                                                        <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    </div>
+                                                    <span className="text-gray-300">Calcul précis basé sur votre taille et poids</span>
+                                                </motion.div>
+                                                <motion.div 
+                                                    className="flex items-center space-x-3 p-3 rounded-lg bg-gray-800/50 hover:bg-gray-800 transition-colors duration-300"
+                                                    whileHover={{ x: 5 }}
+                                                >
+                                                    <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
+                                                        <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    </div>
+                                                    <span className="text-gray-300">Recommandations personnalisées</span>
+                                                </motion.div>
+                                                <motion.div 
+                                                    className="flex items-center space-x-3 p-3 rounded-lg bg-gray-800/50 hover:bg-gray-800 transition-colors duration-300"
+                                                    whileHover={{ x: 5 }}
+                                                >
+                                                    <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
+                                                        <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    </div>
+                                                    <span className="text-gray-300">Suivi de votre progression</span>
+                                                </motion.div>
+                                            </div>
+
+                                            <div className="mt-8">
+                                                <Link
+                                                    href={route('bmi.calculator')}
+                                                    className="inline-block w-full px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-medium rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 shadow-lg transform hover:scale-105 text-center"
+                                                >
+                                                    Calculer mon IMC
+                                                </Link>
+                                            </div>
+                                        </motion.div>
+
+                                        <motion.div
+                                            initial={{ opacity: 0, x: 20 }}
+                                            whileInView={{ opacity: 1, x: 0 }}
+                                            transition={{ duration: 0.6, delay: 0.2 }}
+                                            viewport={{ once: true }}
+                                            className="relative"
+                                        >
+                                            <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
+                                                <img 
+                                                    src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                                                    alt="BMI Calculator"
+                                                    className="object-cover w-full h-full"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                            </div>
+                                            <div className="absolute bottom-0 left-0 right-0 p-6">
+                                                <h4 className="text-xl font-bold text-white mb-2">Comprendre votre IMC</h4>
+                                                <p className="text-gray-300 text-sm">
+                                                    L'IMC est un indicateur important pour évaluer votre santé et adapter votre programme d'entraînement.
+                                                </p>
+                                            </div>
+                                        </motion.div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 {/* Membership Plans Section - With vibrant gradient theme */}
                 <section ref={membershipRef} className="py-24 relative overflow-hidden bg-gradient-to-b from-gray-100 via-gray-50 to-gray-50">
                     {/* Background elements */}

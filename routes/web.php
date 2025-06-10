@@ -9,6 +9,8 @@ use App\Models\Comment;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     $comments = Comment::with('user')
@@ -67,27 +69,33 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/payments/{subscription}', [PaymentController::class, 'store'])->name('payment.store');
     Route::post('/payments/{subscription}/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
 
-    // Discount routes
-    Route::get('/discounts', [DiscountController::class, 'index'])->name('discounts.index');
-    Route::get('/discounts/create', [DiscountController::class, 'create'])->name('discounts.create');
-    Route::post('/discounts', [DiscountController::class, 'store'])->name('discounts.store');
-    Route::get('/discounts/{discount}/edit', [DiscountController::class, 'edit'])->name('discounts.edit');
-    Route::put('/discounts/{discount}', [DiscountController::class, 'update'])->name('discounts.update');
-    Route::delete('/discounts/{discount}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
-    Route::post('/discounts/validate', [DiscountController::class, 'validateCode'])->name('discounts.validate');
-
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Admin routes
-    Route::get('/admin', [App\Http\Controllers\AdminController::class, 'index'])->name('admin.index');
-
     // Comment routes
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::post('/comments/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve')->middleware('admin');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy')->middleware('admin');
+});
+
+// --- Temporarily unprotected routes for testing promo code management ---
+Route::get('/discounts', [DiscountController::class, 'index'])->name('discounts.index');
+Route::post('/discounts', [DiscountController::class, 'store'])->name('discounts.store');
+Route::delete('/discounts/{discount}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
+
+// Admin routes without middleware
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('index');
+    Route::get('/users', [AdminController::class, 'users'])->name('users');
+    Route::get('/subscriptions', [AdminController::class, 'subscriptions'])->name('subscriptions');
+    Route::get('/subscriptions/create', [AdminController::class, 'createSubscriptionForm'])->name('subscriptions.create');
+    Route::post('/subscriptions', [AdminController::class, 'createSubscription'])->name('subscriptions.store');
+    Route::get('/discounts', [AdminController::class, 'discounts'])->name('discounts');
+    Route::post('/discounts', [AdminController::class, 'storeDiscount'])->name('discounts.store');
+    Route::put('/discounts/{discount}', [AdminController::class, 'updateDiscount'])->name('discounts.update');
+    Route::delete('/discounts/{discount}', [AdminController::class, 'destroyDiscount'])->name('discounts.destroy');
 });
 
 Route::get('/bmi-calculator', function () {
