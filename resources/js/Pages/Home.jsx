@@ -937,6 +937,30 @@ const ProgramParticles = () => {
     );
 };
 
+const ReservationSection = () => {
+    return (
+        <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
+            <div className="container mx-auto px-4">
+                <div className="max-w-4xl mx-auto text-center">
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
+                        Ready to Start Your Fitness Journey?
+                    </h2>
+                    <p className="text-xl text-gray-300 mb-12">
+                        Book your session now and take the first step towards a healthier lifestyle.
+                        Our expert trainers are ready to guide you through your fitness goals.
+                    </p>
+                    <Link
+                        href={route('reservations.create')}
+                        className="inline-block bg-orange-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-orange-700 transition duration-300 transform hover:scale-105"
+                    >
+                        Reserve Your Session
+                    </Link>
+                </div>
+            </div>
+        </section>
+    );
+};
+
 // Main component
 export default function Home({ comments: initialComments, auth, activeSubscription, hasActiveSubscription }) {
     // console.log('Auth prop in Home.jsx:', auth); // Add this line
@@ -1967,8 +1991,9 @@ export default function Home({ comments: initialComments, auth, activeSubscripti
                     </div>
                 </section>
                 
-                {/* Footer - Black theme with reduced height */}
-                <footer className="bg-black text-white pt-10 pb-6">
+                <ReservationSection />
+                
+                <footer className="bg-gray-900 text-white py-12">
                     <div className="container mx-auto px-6">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                             <div>

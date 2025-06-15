@@ -12,6 +12,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ReservationController;
 
 Route::get('/', function () {
     // If an authenticated user is an admin, redirect them to the admin dashboard
@@ -102,6 +103,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::post('/comments/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve')->middleware('admin');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy')->middleware('admin');
+
+    // Reservation routes
+    Route::get('/reservations/create', [ReservationController::class, 'create'])->name('reservations.create');
+    Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
 });
 
 // --- Temporarily unprotected routes for testing promo code management ---

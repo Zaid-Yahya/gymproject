@@ -25,9 +25,10 @@
         "@stripe/stripe-js": "^7.1.0",
         "chart.js": "^4.5.0",
         "date-fns": "^4.1.0",
-        "framer-motion": "^12.11.3",
+        "framer-motion": "^12.18.1",
         "react-chartjs-2": "^5.3.0",
         "react-helmet": "^6.1.0",
+        "react-hot-toast": "^2.5.2",
         "recharts": "^2.15.3"
     }
 }
