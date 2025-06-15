@@ -12,12 +12,12 @@ class ReservationConfirmation extends Mailable
     use Queueable, SerializesModels;
 
     public $reservation;
-    public $qrCode;
+    public $qrCodeUrl;
 
-    public function __construct(Reservation $reservation, $qrCode)
+    public function __construct(Reservation $reservation, $qrCodeUrl)
     {
         $this->reservation = $reservation;
-        $this->qrCode = $qrCode;
+        $this->qrCodeUrl = $qrCodeUrl;
     }
 
     public function build()
@@ -26,7 +26,7 @@ class ReservationConfirmation extends Mailable
                     ->view('emails.reservation-confirmation')
                     ->with([
                         'reservation' => $this->reservation,
-                        'qrCode' => $this->qrCode,
+                        'qrCodeUrl' => $this->qrCodeUrl,
                     ]);
     }
 } 

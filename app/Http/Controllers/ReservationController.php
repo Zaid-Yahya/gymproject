@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ReservationConfirmation;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+// use SimpleSoftwareIO\QrCode\Facades\QrCode; // Removed QrCode facade
+// use Illuminate\Support\Facades\Storage; // Removed Storage facade
 
 class ReservationController extends Controller
 {
@@ -28,13 +29,12 @@ class ReservationController extends Controller
             'status' => 'pending',
         ]);
 
-        // Generate QR code
-        $qrCode = QrCode::format('png')
-            ->size(300)
-            ->generate($reservation->id);
+        // Generate QR code URL using a public API (e.g., goqr.me)
+        $qrCodeData = $reservation->id; // Data to encode in QR code
+        $qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($qrCodeData);
 
-        // Send confirmation email
-        Mail::to(Auth::user()->email)->send(new ReservationConfirmation($reservation, $qrCode));
+        // Send confirmation email with QR code URL
+        Mail::to(Auth::user()->email)->send(new ReservationConfirmation($reservation, $qrCodeUrl));
 
         return redirect()->back()->with('success', 'Session reserved successfully!');
     }

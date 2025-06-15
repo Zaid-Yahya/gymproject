@@ -943,17 +943,17 @@ const ReservationSection = () => {
             <div className="container mx-auto px-4">
                 <div className="max-w-4xl mx-auto text-center">
                     <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
-                        Ready to Start Your Fitness Journey?
+                        Prêt à Commencer Votre Voyage Fitness?
                     </h2>
                     <p className="text-xl text-gray-300 mb-12">
-                        Book your session now and take the first step towards a healthier lifestyle.
-                        Our expert trainers are ready to guide you through your fitness goals.
+                        Réservez votre séance maintenant et faites le premier pas vers un mode de vie plus sain.
+                        Nos entraîneurs experts sont prêts à vous guider dans vos objectifs fitness.
                     </p>
                     <Link
                         href={route('reservations.create')}
                         className="inline-block bg-orange-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-orange-700 transition duration-300 transform hover:scale-105"
                     >
-                        Reserve Your Session
+                        Réserver Votre Séance
                     </Link>
                 </div>
             </div>
@@ -1991,8 +1991,10 @@ export default function Home({ comments: initialComments, auth, activeSubscripti
                     </div>
                 </section>
                 
+                {/* Reservation Section */}
                 <ReservationSection />
-                
+
+                {/* Footer */}
                 <footer className="bg-gray-900 text-white py-12">
                     <div className="container mx-auto px-6">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">

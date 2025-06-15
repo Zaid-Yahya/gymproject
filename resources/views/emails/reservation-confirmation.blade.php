@@ -56,7 +56,7 @@
 
             <div class="qr-code">
                 <p><strong>Your Session QR Code:</strong></p>
-                <img src="data:image/png;base64,{{ base64_encode($qrCode) }}" alt="Reservation QR Code">
+                <img src="{{ $qrCodeUrl }}" alt="Reservation QR Code" style="max-width: 200px; height: auto;">
             </div>
 
             <p>Please present this QR code when you arrive for your session. Our staff will scan it to confirm your reservation.</p>
