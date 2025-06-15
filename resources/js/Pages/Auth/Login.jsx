@@ -9,6 +9,7 @@ export default function Login({ status, canResetPassword }) {
         email: '',
         password: '',
         remember: false,
+        role: 'user',
     });
 
     // Updated rotating text configuration - single background color
@@ -272,6 +273,23 @@ export default function Login({ status, canResetPassword }) {
                                     onChange={(e) => setData('password', e.target.value)}
                                 />
                                 <InputError message={errors.password} className="mt-1" />
+                            </div>
+
+                            <div className="mb-4">
+                                <label htmlFor="role" className="block text-gray-700 font-medium mb-1">
+                                    Role
+                                </label>
+                                <select
+                                    id="role"
+                                    name="role"
+                                    value={data.role}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    onChange={(e) => setData('role', e.target.value)}
+                                >
+                                    <option value="user">User</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                                <InputError message={errors.role} className="mt-1" />
                             </div>
 
                             <div className="flex items-center justify-between mb-6">

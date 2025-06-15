@@ -939,6 +939,12 @@ const ProgramParticles = () => {
 
 // Main component
 export default function Home({ comments: initialComments, auth, activeSubscription, hasActiveSubscription }) {
+    // console.log('Auth prop in Home.jsx:', auth); // Add this line
+    const { data, setData, post, processing, errors, reset } = useForm({
+        content: '',
+        rating: 0
+    });
+    
     // Ref for sections scrolling
     const heroRef = useRef(null);
     const galleryRef = useRef(null);

@@ -199,17 +199,17 @@ export default function Navbar({ activeSection = 'hero' }) {
                             </div>
                         ) : (
                             <>
-                                <Link 
-                                    href={route('login')} 
-                                    className="px-4 py-2 transition-all duration-300 text-gray-300 hover:text-orange-400"
+                                <Link
+                                    href={route('login')}
+                                    className="text-sm font-medium text-gray-300 hover:text-orange-400 transition-colors duration-300"
                                 >
-                                    Connexion
+                                    Se connecter
                                 </Link>
-                                <Link 
-                                    href={route('register')} 
-                                    className="px-6 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 hover:scale-105 transform shadow-md hover:shadow-orange-500/30"
+                                <Link
+                                    href={route('register')}
+                                    className="text-sm font-medium bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-full transition-all duration-300 shadow-md hover:shadow-lg"
                                 >
-                                    Rejoindre
+                                    S'inscrire
                                 </Link>
                             </>
                         )}
@@ -311,62 +311,41 @@ export default function Navbar({ activeSection = 'hero' }) {
                                 </Link>
                             </>
                         )}
-                        
-                        {/* Mobile authentication links */}
-                        <div className="pt-2 flex flex-col space-y-3 px-4">
-                            {auth?.user ? (
-                                <div className="border-t border-gray-800 pt-3">
-                                    <div className="flex items-center space-x-3 mb-3">
-                                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center text-white font-bold shadow-lg">
-                                            {auth.user.avatar ? (
-                                                <img 
-                                                    src={auth.user.avatar} 
-                                                    alt={auth.user.name} 
-                                                    className="w-full h-full rounded-full object-cover"
-                                                />
-                                            ) : (
-                                                getUserInitials()
-                                            )}
-                                        </div>
-                                        <div>
-                                            <p className="text-sm text-white font-medium">{auth.user.name}</p>
-                                            <p className="text-xs text-gray-400 truncate">{auth.user.email}</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <Link 
-                                        href={route('profile.edit')}
-                                        className="block py-2 text-gray-300 hover:text-orange-400 transition-all duration-300"
-                                    >
-                                        Modifier Profil
-                                    </Link>
-                                    
-                                    <Link 
-                                        href={route('logout')} 
-                                        method="post" 
-                                        as="button"
-                                        className="block w-full text-left py-2 text-gray-300 hover:text-orange-400 transition-all duration-300"
-                                    >
-                                        Déconnexion
-                                    </Link>
-                                </div>
-                            ) : (
-                                <>
-                                    <Link 
-                                        href={route('login')} 
-                                        className="py-2 text-gray-300 hover:text-orange-400 transition-all duration-300"
-                                    >
-                                        Connexion
-                                    </Link>
-                                    <Link 
-                                        href={route('register')} 
-                                        className="py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-center rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300"
-                                    >
-                                        Rejoindre
-                                    </Link>
-                                </>
-                            )}
-                        </div>
+
+                        {/* Mobile Authentication Links */}
+                        {auth?.user ? (
+                            <div className="flex flex-col">
+                                <Link
+                                    href={route('profile.edit')}
+                                    className="block py-2 px-4 text-sm text-gray-300 hover:bg-gray-800 hover:text-orange-400"
+                                >
+                                    Modifier Profil
+                                </Link>
+                                <Link
+                                    href={route('logout')}
+                                    method="post"
+                                    as="button"
+                                    className="block w-full text-left py-2 px-4 text-sm text-gray-300 hover:bg-gray-800 hover:text-orange-400"
+                                >
+                                    Déconnexion
+                                </Link>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col space-y-2 px-4">
+                                <Link
+                                    href={route('login')}
+                                    className="py-2 text-gray-300 hover:text-orange-400 transition-colors duration-300"
+                                >
+                                    Se connecter
+                                </Link>
+                                <Link
+                                    href={route('register')}
+                                    className="py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-center rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300"
+                                >
+                                    S'inscrire
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

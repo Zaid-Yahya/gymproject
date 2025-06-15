@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { format } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
+import Modal from '@/Components/Modal'; // Assuming you have a Modal component in Components
 
 export default function Subscriptions({ subscriptions }) {
   const [filteredSubscriptions, setFilteredSubscriptions] = useState(subscriptions);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [tierFilter, setTierFilter] = useState('all');
+
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedSubscription, setSelectedSubscription] = useState(null);
+
+  const { delete: inertiaDelete } = useForm();
 
   useEffect(() => {
     let result = subscriptions;
@@ -93,6 +99,31 @@ export default function Subscriptions({ subscriptions }) {
     }
   };
 
+  const openDetailsModal = (subscription) => {
+    setSelectedSubscription(subscription);
+    setShowDetailsModal(true);
+  };
+
+  const closeDetailsModal = () => {
+    setSelectedSubscription(null);
+    setShowDetailsModal(false);
+  };
+
+  const handleDelete = (subscriptionId) => {
+    if (confirm('Are you sure you want to delete this subscription?')) {
+      inertiaDelete(route('admin.subscriptions.destroy', subscriptionId), {
+        onSuccess: () => {
+          // Optionally, refresh the page or remove the item from the state
+          // For simplicity, we'll let Inertia handle the redirect/refresh
+        },
+        onError: (errors) => {
+          console.error('Error deleting subscription:', errors);
+          alert('Failed to delete subscription.');
+        },
+      });
+    }
+  };
+
   return (
     <AdminLayout>
       <Head title="Subscriptions Management" />
@@ -101,15 +132,15 @@ export default function Subscriptions({ subscriptions }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-semibold text-gray-900">Subscriptions Management</h1>
-            <a
-              href={route('admin.subscriptions.create')}
+            <Link
+              href="/admin/subscriptions/create"
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-orange-400 to-red-500 hover:from-orange-500 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
             >
               <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
               Create Subscription
-            </a>
+            </Link>
           </div>
           
           {/* Stats Cards */}
@@ -251,150 +282,82 @@ export default function Subscriptions({ subscriptions }) {
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Customer
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Plan Details
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Dates
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Progress
-                        </th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Date</th>
+                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {filteredSubscriptions.length > 0 ? (
                         filteredSubscriptions.map((subscription) => (
-                          <tr key={subscription.id} className="hover:bg-gray-50">
+                          <tr key={subscription.id}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{subscription.id}</td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
                                 <div className="flex-shrink-0 h-10 w-10">
-                                  {subscription.user?.image ? (
-                                    <img 
-                                      className="h-10 w-10 rounded-full object-cover" 
-                                      src={subscription.user.image} 
-                                      alt={subscription.user?.name || "User"} 
-                                    />
-                                  ) : (
-                                    <div className="h-10 w-10 rounded-full bg-gradient-to-r from-orange-400 to-red-500 flex items-center justify-center text-white font-medium">
-                                      {subscription.user?.name?.charAt(0) || "U"}
-                                    </div>
-                                  )}
+                                    {subscription.user && subscription.user.image ? (
+                                        <img 
+                                            className="h-10 w-10 rounded-full object-cover border-2 border-orange-100" 
+                                            src={subscription.user.image} 
+                                            alt={subscription.user.name} 
+                                        />
+                                    ) : (
+                                        <div className="h-10 w-10 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center text-white font-bold">
+                                            {subscription.user?.name.charAt(0).toUpperCase() || 'N/A'}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="ml-4">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {subscription.user?.name || "Unknown User"}
-                                  </div>
-                                  <div className="text-sm text-gray-500">
-                                    {subscription.user?.email || "No email"}
-                                  </div>
+                                  <div className="text-sm font-medium text-gray-900">{subscription.user?.name || 'N/A'}</div>
+                                  <div className="text-sm text-gray-500">{subscription.user?.email || 'N/A'}</div>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900 font-medium">{subscription.plan_name}</div>
-                              <div className="flex space-x-2 mt-1">
-                                <span className={getTierBadge(subscription.tier)}>
-                                  Tier {subscription.tier}
-                                </span>
-                                <span className={getPeriodBadge(subscription.period)}>
-                                  {subscription.period?.charAt(0).toUpperCase() + subscription.period?.slice(1)}
-                                </span>
-                              </div>
-                              <div className="text-sm text-gray-500 mt-1">
-                                ${parseFloat(subscription.price).toFixed(2)}
-                                {subscription.original_price && subscription.original_price > subscription.price && (
-                                  <span className="line-through ml-2 text-gray-400">
-                                    ${parseFloat(subscription.original_price).toFixed(2)}
-                                  </span>
-                                )}
-                              </div>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <span className={getPeriodBadge(subscription.period)}>{subscription.plan_name}</span>
+                              <span className="ml-2 text-xs text-gray-400">({subscription.tier ? `Tier ${subscription.tier}` : 'N/A'})</span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-500">
-                                <div>Start: <span className="text-gray-900">{formatDate(subscription.start_date)}</span></div>
-                                <div>End: <span className="text-gray-900">{formatDate(subscription.end_date)}</span></div>
-                                {subscription.cancelled_at && (
-                                  <div>Cancelled: <span className="text-gray-900">{formatDate(subscription.cancelled_at)}</span></div>
-                                )}
-                              </div>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${parseFloat(subscription.price).toFixed(2)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <span className={getStatusBadge(subscription.status)}>{subscription.status}</span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={getStatusBadge(subscription.status)}>
-                                {subscription.status?.charAt(0).toUpperCase() + subscription.status?.slice(1)}
-                              </span>
-                              {subscription.is_expired && subscription.status === 'active' && (
-                                <span className={getStatusBadge('expired')} style={{ marginLeft: '0.5rem' }}>
-                                  Expired
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                                <div 
-                                  className="bg-gradient-to-r from-orange-400 to-red-500 h-2.5 rounded-full" 
-                                  style={{ width: `${subscription.percent_used}%` }}
-                                ></div>
-                              </div>
-                              <div className="text-xs text-gray-500 mt-1">
-                                {subscription.days_used} of {subscription.total_days} days used
-                                {subscription.days_remaining > 0 && (
-                                  <span className="ml-1">({subscription.days_remaining} days left)</span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <div className="flex space-x-2">
-                                <button 
-                                  className="text-orange-600 hover:text-orange-900"
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(subscription.start_date)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(subscription.end_date)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              <div className="flex items-center justify-end space-x-2">
+                                {/* Details Button */}
+                                <button
+                                  onClick={() => openDetailsModal(subscription)}
+                                  className="text-blue-600 hover:text-blue-900"
                                   title="View Details"
                                 >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                  </svg>
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                 </button>
-                                <button 
-                                  className="text-blue-600 hover:text-blue-900"
-                                  title="Edit Subscription"
+                                {/* Delete Button */}
+                                <button
+                                  onClick={() => handleDelete(subscription.id)}
+                                  className="text-red-600 hover:text-red-900"
+                                  title="Delete Subscription"
                                 >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                  </svg>
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
-                                {subscription.status === 'active' && (
-                                  <button 
-                                    className="text-red-600 hover:text-red-900"
-                                    title="Cancel Subscription"
-                                  >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                  </button>
-                                )}
                               </div>
                             </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="6" className="px-6 py-10 text-center text-gray-500">
-                            <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <h3 className="mt-2 text-sm font-medium text-gray-900">No subscriptions found</h3>
-                            <p className="mt-1 text-sm text-gray-500">
-                              Try adjusting your search or filter to find what you're looking for.
-                            </p>
+                          <td colSpan="8" className="px-6 py-10 text-center text-gray-500">
+                            <div className="flex flex-col items-center justify-center">
+                              <svg className="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                              <p className="text-lg font-medium">No subscriptions found</p>
+                              <p className="text-sm text-gray-500 mt-1">Try adjusting your search or filters to find what you're looking for.</p>
+                            </div>
                           </td>
                         </tr>
                       )}
@@ -405,39 +368,67 @@ export default function Subscriptions({ subscriptions }) {
             </div>
           </div>
 
-          {/* Pagination Placeholder */}
-          <div className="mt-4 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-            <div className="flex flex-1 justify-between sm:hidden">
-              <a href="#" className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Previous</a>
-              <a href="#" className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Next</a>
-            </div>
-            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm text-gray-700">
-                  Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredSubscriptions.length}</span> of <span className="font-medium">{filteredSubscriptions.length}</span> results
-                </p>
+          {/* Pagination */}
+          <div className="bg-gray-50 px-4 py-3 sm:px-6 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                Showing {filteredSubscriptions.length} of {subscriptions.length} subscriptions
               </div>
-              <div>
-                <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                  <a href="#" className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-                    <span className="sr-only">Previous</span>
-                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
-                    </svg>
-                  </a>
-                  <a href="#" aria-current="page" className="relative z-10 inline-flex items-center bg-gradient-to-r from-orange-400 to-red-500 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">1</a>
-                  <a href="#" className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-                    <span className="sr-only">Next</span>
-                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
-                    </svg>
-                  </a>
-                </nav>
+              <div className="flex space-x-2">
+                <button className="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50" disabled>Previous</button>
+                <button className="px-3 py-1 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50" disabled>Next</button>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Subscription Details Modal */}
+      <Modal show={showDetailsModal} onClose={closeDetailsModal} maxWidth="2xl">
+        {selectedSubscription && (
+          <div className="p-6">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6 border-b pb-3">Subscription Details</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-6 text-gray-800">
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-3">Basic Information</h4>
+                <p><strong className="font-medium text-gray-600">Subscription ID:</strong> <span className="font-mono text-indigo-700">#{selectedSubscription.id}</span></p>
+                <p><strong className="font-medium text-gray-600">Plan:</strong> <span className="font-semibold text-orange-700">{selectedSubscription.plan_name}</span> ({selectedSubscription.period})</p>
+                <p><strong className="font-medium text-gray-600">Tier:</strong> <span className="font-semibold">Tier {selectedSubscription.tier}</span></p>
+                <p><strong className="font-medium text-gray-600">Price:</strong> <span className="text-green-600 font-bold">${parseFloat(selectedSubscription.price).toFixed(2)}</span></p>
+                {selectedSubscription.original_price > selectedSubscription.price && (
+                  <p><strong className="font-medium text-gray-600">Original Price:</strong> <span className="line-through text-gray-500">${parseFloat(selectedSubscription.original_price).toFixed(2)}</span></p>
+                )}
+                <p><strong className="font-medium text-gray-600">Status:</strong> <span className={getStatusBadge(selectedSubscription.status)}>{selectedSubscription.status}</span></p>
+              </div>
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-3">Customer & Dates</h4>
+                <p><strong className="font-medium text-gray-600">Customer Name:</strong> {selectedSubscription.user?.name || 'N/A'}</p>
+                <p><strong className="font-medium text-gray-600">Customer Email:</strong> {selectedSubscription.user?.email || 'N/A'}</p>
+                <p><strong className="font-medium text-gray-600">Start Date:</strong> {formatDate(selectedSubscription.start_date)}</p>
+                <p><strong className="font-medium text-gray-600">End Date:</strong> {formatDate(selectedSubscription.end_date)}</p>
+                {selectedSubscription.discount && (
+                  <p><strong className="font-medium text-gray-600">Discount:</strong> <span className="text-purple-700 font-semibold">{selectedSubscription.discount.code}</span> ({selectedSubscription.discount.type === 'percentage' ? `${selectedSubscription.discount.value}%` : `$${selectedSubscription.discount.value}`})</p>
+                )}
+              </div>
+              <div className="lg:col-span-2 space-y-4 mt-4">
+                <h4 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-3">Usage & Expiry</h4>
+                <p><strong className="font-medium text-gray-600">Days Remaining:</strong> <span className="text-blue-700 font-bold">{Math.floor(selectedSubscription.days_remaining)}</span> days</p>
+                <p><strong className="font-medium text-gray-600">Days Used:</strong> {selectedSubscription.days_used} days</p>
+                <p><strong className="font-medium text-gray-600">Percentage Used:</strong> <span className="font-bold">{selectedSubscription.percent_used}%</span></p>
+                {selectedSubscription.is_expired && <p className="text-red-600 font-semibold mt-2">This subscription has expired.</p>}
+              </div>
+            </div>
+            <div className="mt-8 flex justify-end">
+              <button
+                onClick={closeDetailsModal}
+                className="px-6 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-md hover:from-orange-600 hover:to-red-600 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 shadow-lg"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </AdminLayout>
   );
 }

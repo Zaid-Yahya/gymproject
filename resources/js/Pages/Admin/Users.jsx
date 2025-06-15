@@ -4,17 +4,19 @@ import AdminLayout from '@/Layouts/AdminLayout';
 
 export default function Users({ users }) {
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterRole, setFilterRole] = useState('');
+    const [subscriptionFilter, setSubscriptionFilter] = useState('');
     
-    // Filter users based on search term and role filter
+    // Filter users based on search term and subscription status
     const filteredUsers = users.filter(user => {
         const matchesSearch = searchTerm === '' || 
             user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase());
             
-        const matchesRole = filterRole === '' || user.role === filterRole;
+        const matchesSubscription = subscriptionFilter === '' || 
+            (subscriptionFilter === 'active' && user.has_active_subscription) ||
+            (subscriptionFilter === 'inactive' && !user.has_active_subscription);
         
-        return matchesSearch && matchesRole;
+        return matchesSearch && matchesSubscription;
     });
     
     return (
@@ -42,12 +44,12 @@ export default function Users({ users }) {
                 <div className="flex items-center gap-4">
                     <select
                         className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2.5"
-                        value={filterRole}
-                        onChange={(e) => setFilterRole(e.target.value)}
+                        value={subscriptionFilter}
+                        onChange={(e) => setSubscriptionFilter(e.target.value)}
                     >
-                        <option value="">All Roles</option>
-                        <option value="admin">Admin</option>
-                        <option value="user">User</option>
+                        <option value="">All Subscription Status</option>
+                        <option value="active">Active Subscription</option>
+                        <option value="inactive">No Active Subscription</option>
                     </select>
                     
                     <button className="px-4 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-orange-500/30">
@@ -61,7 +63,7 @@ export default function Users({ users }) {
             
             <div className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
                 <div className="p-5 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 flex justify-between items-center">
-                    <h2 className="text-xl font-semibold text-gray-800">All Users</h2>
+                    <h2 className="text-xl font-semibold text-gray-800">Regular Users</h2>
                     <span className="text-sm text-gray-600 bg-white py-1 px-3 rounded-full border border-gray-200 shadow-sm">
                         {filteredUsers.length} {filteredUsers.length === 1 ? 'user' : 'users'}
                     </span>
@@ -81,7 +83,7 @@ export default function Users({ users }) {
                                     Email
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Role
+                                    Subscription Status
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Joined
@@ -125,12 +127,17 @@ export default function Users({ users }) {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                                user.role === 'admin' 
-                                                    ? 'bg-orange-100 text-orange-800 border border-orange-200' 
-                                                    : 'bg-blue-100 text-blue-800 border border-blue-200'
+                                                user.has_active_subscription 
+                                                    ? 'bg-green-100 text-green-800 border border-green-200' 
+                                                    : 'bg-gray-100 text-gray-800 border border-gray-200'
                                             }`}>
-                                                {user.role || 'user'}
+                                                {user.has_active_subscription ? 'Active' : 'No Subscription'}
                                             </span>
+                                            {user.has_active_subscription && user.subscriptions[0] && (
+                                                <span className="ml-2 text-xs text-gray-500">
+                                                    {user.subscriptions[0].plan_name}
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {new Date(user.created_at).toLocaleDateString('en-US', {
@@ -140,19 +147,19 @@ export default function Users({ users }) {
                                             })}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <div className="flex space-x-2">
-                                                <button className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 rounded-md p-1.5 transition-colors duration-150">
+                                            <div className="flex items-center space-x-3">
+                                                <button className="text-orange-600 hover:text-orange-900">
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                                     </svg>
                                                 </button>
-                                                <button className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 rounded-md p-1.5 transition-colors duration-150">
+                                                <button className="text-blue-600 hover:text-blue-900">
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                                     </svg>
                                                 </button>
-                                                <button className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 rounded-md p-1.5 transition-colors duration-150">
+                                                <button className="text-red-600 hover:text-red-900">
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                                     </svg>

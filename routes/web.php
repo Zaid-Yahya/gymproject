@@ -11,8 +11,14 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
+    // If an authenticated user is an admin, redirect them to the admin dashboard
+    if (auth()->check() && auth()->user()->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+
     $comments = Comment::with('user')
         ->where('is_approved', true)
         ->latest()
@@ -55,6 +61,24 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
+    // Admin routes
+    Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/users', [AdminController::class, 'users'])->name('users');
+        Route::get('/subscriptions', [AdminController::class, 'subscriptions'])->name('subscriptions');
+        Route::get('/subscriptions/create', [AdminController::class, 'createSubscriptionForm'])->name('subscriptions.create');
+        Route::post('/subscriptions/store', [AdminController::class, 'storeSubscription'])->name('subscriptions.store');
+        Route::delete('/subscriptions/{subscription}', [AdminController::class, 'destroySubscription'])->name('subscriptions.destroy');
+        Route::get('/payments', [AdminController::class, 'payments'])->name('payments');
+        Route::get('/discounts', [AdminController::class, 'discounts'])->name('discounts');
+        Route::get('/statistics', [AdminController::class, 'renderStatisticsPage'])->name('statistics');
+        Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
+        Route::post('/profile', [AdminController::class, 'updateProfile'])->name('profile.update');
+    });
+
+    // New API route for statistics data
+    Route::get('/api/admin/statistics', [AdminController::class, 'getStatisticsData'])->middleware('admin');
+
     // Subscription routes
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
     Route::get('/subscriptions/plans', [SubscriptionController::class, 'plans'])->name('subscriptions.plans');
@@ -84,19 +108,6 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/discounts', [DiscountController::class, 'index'])->name('discounts.index');
 Route::post('/discounts', [DiscountController::class, 'store'])->name('discounts.store');
 Route::delete('/discounts/{discount}', [DiscountController::class, 'destroy'])->name('discounts.destroy');
-
-// Admin routes without middleware
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [AdminController::class, 'index'])->name('index');
-    Route::get('/users', [AdminController::class, 'users'])->name('users');
-    Route::get('/subscriptions', [AdminController::class, 'subscriptions'])->name('subscriptions');
-    Route::get('/subscriptions/create', [AdminController::class, 'createSubscriptionForm'])->name('subscriptions.create');
-    Route::post('/subscriptions', [AdminController::class, 'createSubscription'])->name('subscriptions.store');
-    Route::get('/discounts', [AdminController::class, 'discounts'])->name('discounts');
-    Route::post('/discounts', [AdminController::class, 'storeDiscount'])->name('discounts.store');
-    Route::put('/discounts/{discount}', [AdminController::class, 'updateDiscount'])->name('discounts.update');
-    Route::delete('/discounts/{discount}', [AdminController::class, 'destroyDiscount'])->name('discounts.destroy');
-});
 
 Route::get('/bmi-calculator', function () {
     return Inertia::render('BmiCalculator');

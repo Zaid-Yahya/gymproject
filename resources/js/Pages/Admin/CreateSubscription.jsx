@@ -10,6 +10,7 @@ export default function CreateSubscription({ users, discounts }) {
     const [showNewUserForm, setShowNewUserForm] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [isNewUser, setIsNewUser] = useState(false);
+    const [activeSubscription, setActiveSubscription] = useState(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         user_id: '',
@@ -20,11 +21,11 @@ export default function CreateSubscription({ users, discounts }) {
         discount_id: '',
         start_date: format(new Date(), 'yyyy-MM-dd'),
         end_date: format(new Date(new Date().setMonth(new Date().getMonth() + 1)), 'yyyy-MM-dd'),
+        is_upgrade: false,
         // New user fields
         new_user: {
             name: '',
             email: '',
-            phone: '',
         }
     });
 
@@ -47,6 +48,13 @@ export default function CreateSubscription({ users, discounts }) {
             quarterly: 348,
             yearly: 1238,
         },
+    };
+
+    // Plan tiers for upgrade calculation
+    const planTiers = {
+        Basic: 1,
+        Premium: 2,
+        Elite: 3
     };
 
     // Insurance fee
@@ -72,16 +80,47 @@ export default function CreateSubscription({ users, discounts }) {
 
     // Update prices when plan or period changes
     useEffect(() => {
-        const originalPrice = planPrices[data.plan_name][data.period];
-        const discountedPrice = selectedDiscount ? calculateDiscountedPrice(originalPrice, selectedDiscount) : originalPrice;
-        const finalPrice = isNewUser ? discountedPrice + INSURANCE_FEE : discountedPrice;
+        if (activeSubscription) {
+            // Calculate upgrade price
+            const currentPlanTier = planTiers[activeSubscription.plan_name];
+            const newPlanTier = planTiers[data.plan_name];
+            
+            if (newPlanTier <= currentPlanTier) {
+                setData(data => ({
+                    ...data,
+                    original_price: 0,
+                    price: 0,
+                }));
+                return;
+            }
 
-        setData(data => ({
-            ...data,
-            original_price: originalPrice,
-            price: finalPrice,
-        }));
-    }, [data.plan_name, data.period, selectedDiscount, isNewUser]);
+            const originalPrice = planPrices[data.plan_name][data.period];
+            const discountedPrice = selectedDiscount ? calculateDiscountedPrice(originalPrice, selectedDiscount) : originalPrice;
+            
+            // Calculate prorated upgrade price
+            const daysRemaining = Math.ceil((new Date(activeSubscription.end_date) - new Date()) / (1000 * 60 * 60 * 24));
+            const totalDays = Math.ceil((new Date(activeSubscription.end_date) - new Date(activeSubscription.start_date)) / (1000 * 60 * 60 * 24));
+            const proratedPrice = (discountedPrice * daysRemaining) / totalDays;
+
+            setData(data => ({
+                ...data,
+                original_price: originalPrice,
+                price: proratedPrice,
+                is_upgrade: true,
+            }));
+        } else {
+            const originalPrice = planPrices[data.plan_name][data.period];
+            const discountedPrice = selectedDiscount ? calculateDiscountedPrice(originalPrice, selectedDiscount) : originalPrice;
+            const finalPrice = isNewUser ? discountedPrice + INSURANCE_FEE : discountedPrice;
+
+            setData(data => ({
+                ...data,
+                original_price: originalPrice,
+                price: finalPrice,
+                is_upgrade: false,
+            }));
+        }
+    }, [data.plan_name, data.period, selectedDiscount, isNewUser, activeSubscription]);
 
     // Calculate discounted price
     const calculateDiscountedPrice = (originalPrice, discount) => {
@@ -103,7 +142,11 @@ export default function CreateSubscription({ users, discounts }) {
                 setSelectedUser(null);
                 setShowNewUserForm(false);
                 setIsNewUser(false);
+                setActiveSubscription(null);
             },
+            onError: (errors) => {
+                console.error('Form submission errors:', errors);
+            }
         });
     };
 
@@ -119,6 +162,18 @@ export default function CreateSubscription({ users, discounts }) {
         setSearchQuery(user.name);
         setSearchResults([]);
         setIsNewUser(false);
+
+        // Check for active subscription
+        const activeSub = user.subscriptions?.[0];
+        if (activeSub) {
+            setActiveSubscription(activeSub);
+            setData('plan_name', activeSub.plan_name);
+            setData('period', activeSub.period);
+        } else {
+            setActiveSubscription(null);
+            setData('plan_name', 'Basic');
+            setData('period', 'monthly');
+        }
     };
 
     const handleNewUser = () => {
@@ -126,6 +181,7 @@ export default function CreateSubscription({ users, discounts }) {
         setSelectedUser(null);
         setData('user_id', '');
         setIsNewUser(true);
+        setActiveSubscription(null);
     };
 
     return (
@@ -136,7 +192,9 @@ export default function CreateSubscription({ users, discounts }) {
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
-                            <h2 className="text-2xl font-semibold mb-6">Create New Subscription</h2>
+                            <h2 className="text-2xl font-semibold mb-6">
+                                {activeSubscription ? 'Upgrade Subscription' : 'Create New Subscription'}
+                            </h2>
 
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 {/* User Search/Selection */}
@@ -144,9 +202,16 @@ export default function CreateSubscription({ users, discounts }) {
                                     <label className="block text-sm font-medium text-gray-700">Search User</label>
                                     {selectedUser ? (
                                         <div className="mt-1 flex items-center justify-between p-3 bg-indigo-50 rounded-md">
-                                            <span className="text-indigo-800 font-medium">
-                                                Selected User: {selectedUser.name} ({selectedUser.email})
-                                            </span>
+                                            <div>
+                                                <span className="text-indigo-800 font-medium">
+                                                    Selected User: {selectedUser.name} ({selectedUser.email})
+                                                </span>
+                                                {activeSubscription && (
+                                                    <div className="mt-1 text-sm text-indigo-600">
+                                                        Current Plan: {activeSubscription.plan_name} ({activeSubscription.period})
+                                                    </div>
+                                                )}
+                                            </div>
                                             <button
                                                 type="button"
                                                 onClick={() => {
@@ -155,6 +220,7 @@ export default function CreateSubscription({ users, discounts }) {
                                                     setSearchQuery('');
                                                     setShowNewUserForm(false);
                                                     setIsNewUser(false);
+                                                    setActiveSubscription(null);
                                                     reset('new_user');
                                                 }}
                                                 className="text-sm text-indigo-600 hover:text-indigo-500"
@@ -184,6 +250,11 @@ export default function CreateSubscription({ users, discounts }) {
                                                             className="w-full text-left px-4 py-2 hover:bg-gray-100"
                                                         >
                                                             {user.name} ({user.email})
+                                                            {user.subscriptions?.[0] && (
+                                                                <span className="text-sm text-gray-500 ml-2">
+                                                                    - Current Plan: {user.subscriptions[0].plan_name}
+                                                                </span>
+                                                            )}
                                                         </button>
                                                     ))}
                                                 </div>
@@ -219,6 +290,9 @@ export default function CreateSubscription({ users, discounts }) {
                                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                     required
                                                 />
+                                                {errors['new_user.name'] && (
+                                                    <p className="mt-1 text-sm text-red-600">{errors['new_user.name']}</p>
+                                                )}
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700">Email</label>
@@ -229,16 +303,9 @@ export default function CreateSubscription({ users, discounts }) {
                                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                     required
                                                 />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">Phone</label>
-                                                <input
-                                                    type="tel"
-                                                    value={data.new_user.phone}
-                                                    onChange={e => setData('new_user', { ...data.new_user, phone: e.target.value })}
-                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                    required
-                                                />
+                                                {errors['new_user.email'] && (
+                                                    <p className="mt-1 text-sm text-red-600">{errors['new_user.email']}</p>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="flex justify-end">
@@ -249,7 +316,7 @@ export default function CreateSubscription({ users, discounts }) {
                                                     setIsNewUser(false);
                                                     reset('new_user');
                                                 }}
-                                                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                                                className="mr-2 px-4 py-2 text-sm text-gray-700 hover:text-gray-900"
                                             >
                                                 Cancel
                                             </button>
@@ -257,120 +324,102 @@ export default function CreateSubscription({ users, discounts }) {
                                     </div>
                                 )}
 
-                                {/* Plan Selection */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Plan</label>
-                                    <select
-                                        value={data.plan_name}
-                                        onChange={e => setData('plan_name', e.target.value)}
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                        required
-                                    >
-                                        <option value="Basic">Basic</option>
-                                        <option value="Premium">Premium</option>
-                                        <option value="Elite">Elite</option>
-                                    </select>
-                                    {errors.plan_name && <div className="text-red-500 text-sm mt-1">{errors.plan_name}</div>}
-                                </div>
-
-                                {/* Period Selection */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Period</label>
-                                    <select
-                                        value={data.period}
-                                        onChange={e => setData('period', e.target.value)}
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                        required
-                                    >
-                                        <option value="monthly">Monthly</option>
-                                        <option value="quarterly">Quarterly</option>
-                                        <option value="yearly">Yearly</option>
-                                    </select>
-                                    {errors.period && <div className="text-red-500 text-sm mt-1">{errors.period}</div>}
-                                </div>
-
-                                {/* Discount Selection */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Discount (Optional)</label>
-                                    <select
-                                        value={data.discount_id}
-                                        onChange={e => handleDiscountChange(e.target.value)}
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    >
-                                        <option value="">No discount</option>
-                                        {discounts.map(discount => (
-                                            <option key={discount.id} value={discount.id}>
-                                                {discount.name} ({discount.type === 'percentage' ? `${discount.value}%` : `$${discount.value}`})
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.discount_id && <div className="text-red-500 text-sm mt-1">{errors.discount_id}</div>}
-                                </div>
-
-                                {/* Dates */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Start Date</label>
-                                        <input
-                                            type="date"
-                                            value={data.start_date}
-                                            onChange={e => setData('start_date', e.target.value)}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                            required
-                                        />
-                                        {errors.start_date && <div className="text-red-500 text-sm mt-1">{errors.start_date}</div>}
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">End Date</label>
-                                        <input
-                                            type="date"
-                                            value={data.end_date}
-                                            onChange={e => setData('end_date', e.target.value)}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                            required
-                                        />
-                                        {errors.end_date && <div className="text-red-500 text-sm mt-1">{errors.end_date}</div>}
-                                    </div>
-                                </div>
-
-                                {/* Price Summary */}
-                                <div className="bg-gray-50 p-4 rounded-md">
-                                    <h3 className="text-lg font-medium text-gray-900 mb-2">Price Summary</h3>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between">
-                                            <span>Original Price:</span>
-                                            <span>${data.original_price}</span>
+                                {/* Subscription Details */}
+                                {!showNewUserForm && (
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Plan</label>
+                                            <select
+                                                value={data.plan_name}
+                                                onChange={e => setData('plan_name', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                disabled={activeSubscription && planTiers[e.target.value] <= planTiers[activeSubscription.plan_name]}
+                                            >
+                                                <option value="Basic">Basic</option>
+                                                <option value="Premium">Premium</option>
+                                                <option value="Elite">Elite</option>
+                                            </select>
+                                            {activeSubscription && planTiers[data.plan_name] <= planTiers[activeSubscription.plan_name] && (
+                                                <p className="mt-1 text-sm text-red-600">
+                                                    You can only upgrade to a higher tier plan
+                                                </p>
+                                            )}
                                         </div>
-                                        {selectedDiscount && (
-                                            <div className="flex justify-between text-green-600">
-                                                <span>Discount:</span>
-                                                <span>
-                                                    {selectedDiscount.type === 'percentage' 
-                                                        ? `-${selectedDiscount.value}%`
-                                                        : `-$${selectedDiscount.value}`}
-                                                </span>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Period</label>
+                                            <select
+                                                value={data.period}
+                                                onChange={e => setData('period', e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            >
+                                                <option value="monthly">Monthly</option>
+                                                <option value="quarterly">Quarterly</option>
+                                                <option value="yearly">Yearly</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Discount</label>
+                                            <select
+                                                value={data.discount_id}
+                                                onChange={e => handleDiscountChange(e.target.value)}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            >
+                                                <option value="">No Discount</option>
+                                                {discounts.map(discount => (
+                                                    <option key={discount.id} value={discount.id}>
+                                                        {discount.name} ({discount.type === 'percentage' ? `${discount.value}%` : `$${discount.value}`})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        <div className="bg-gray-50 p-4 rounded-md">
+                                            <h4 className="text-lg font-medium text-gray-900 mb-2">Price Summary</h4>
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between">
+                                                    <span>Original Price:</span>
+                                                    <span>${data.original_price}</span>
+                                                </div>
+                                                {selectedDiscount && (
+                                                    <div className="flex justify-between text-green-600">
+                                                        <span>Discount:</span>
+                                                        <span>
+                                                            {selectedDiscount.type === 'percentage' 
+                                                                ? `-${selectedDiscount.value}%`
+                                                                : `-$${selectedDiscount.value}`}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {isNewUser && (
+                                                    <div className="flex justify-between">
+                                                        <span>Insurance Fee:</span>
+                                                        <span>${INSURANCE_FEE}</span>
+                                                    </div>
+                                                )}
+                                                {activeSubscription && (
+                                                    <div className="flex justify-between text-blue-600">
+                                                        <span>Prorated Upgrade:</span>
+                                                        <span>Based on remaining days</span>
+                                                    </div>
+                                                )}
+                                                <div className="flex justify-between font-bold border-t pt-2 mt-2">
+                                                    <span>Final Price:</span>
+                                                    <span>${data.price}</span>
+                                                </div>
                                             </div>
-                                        )}
-                                        {isNewUser && (
-                                            <div className="flex justify-between text-blue-600">
-                                                <span>Insurance Fee:</span>
-                                                <span>+${INSURANCE_FEE}</span>
-                                            </div>
-                                        )}
-                                        <div className="flex justify-between font-semibold border-t pt-2">
-                                            <span>Final Price:</span>
-                                            <span>${data.price}</span>
                                         </div>
                                     </div>
-                                </div>
+                                )}
 
                                 <div className="flex justify-end">
                                     <button
                                         type="submit"
-                                        disabled={processing}
-                                        className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                                        disabled={processing || (activeSubscription && planTiers[data.plan_name] <= planTiers[activeSubscription.plan_name])}
+                                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
                                     >
-                                        {processing ? 'Creating...' : 'Create Subscription'}
+                                        {processing ? 'Processing...' : activeSubscription ? 'Upgrade Subscription' : 'Create Subscription'}
                                     </button>
                                 </div>
                             </form>
