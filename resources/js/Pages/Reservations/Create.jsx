@@ -152,7 +152,7 @@ export default function Create({ auth }) {
                                         mode="single"
                                         selected={data.date}
                                         onSelect={(date) => setData('date', date)}
-                                        className="rounded-md border border-gray-700 bg-gray-800 text-white w-full max-w-sm mx-auto"
+                                        className="rounded-md border border-gray-700 bg-gray-800 text-white w-full"
                                         disabled={(date) => date < new Date()}
                                     />
                                     {errors.date && (

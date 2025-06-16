@@ -15,7 +15,7 @@ const Calendar = forwardRef(({ className, classNames, showOutsideDays = true, ..
                 caption_label: "text-xl font-bold text-white tracking-wide",
                 nav: "flex items-center justify-center gap-6 mb-4",
                 nav_button: cn(
-                    "h-9 w-9 bg-slate-700/50 hover:bg-slate-600/50 p-2 rounded-xl opacity-70 hover:opacity-100 text-slate-300 hover:text-[#A8E6CF] transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF]/50"
+                    "h-9 w-9 bg-slate-700/50 hover:bg-slate-600/50 p-2 rounded-xl opacity-70 hover:opacity-100 text-blue-400 hover:text-blue-300 transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
                 ),
                 nav_button_previous: "",
                 nav_button_next: "",
@@ -37,14 +37,14 @@ const Calendar = forwardRef(({ className, classNames, showOutsideDays = true, ..
                 ),
                 day_range_end: "day-range-end",
                 day_selected: cn(
-                    "bg-[#A8E6CF] text-slate-900 font-bold shadow-lg shadow-[#A8E6CF]/25",
-                    "hover:bg-[#9BDCC3] focus:bg-[#A8E6CF]",
+                    "bg-blue-600 text-white font-bold shadow-lg shadow-blue-600/25",
+                    "hover:bg-blue-700 focus:bg-blue-600",
                     "before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/20 before:to-transparent before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-200 before:rounded-xl"
                 ),
                 day_today: cn(
-                    "bg-slate-700/80 text-white font-semibold border-2 border-[#A8E6CF]/60 shadow-md shadow-[#A8E6CF]/20",
-                    "hover:bg-slate-600/80 hover:border-[#A8E6CF]/80 hover:shadow-[#A8E6CF]/30",
-                    "after:absolute after:-bottom-1 after:left-1/2 after:transform after:-translate-x-1/2 after:w-1 after:h-1 after:bg-[#A8E6CF] after:rounded-full"
+                    "bg-slate-700/80 text-white font-semibold border-2 border-blue-400/60 shadow-md shadow-blue-400/20",
+                    "hover:bg-slate-600/80 hover:border-blue-400/80 hover:shadow-blue-400/30",
+                    "after:absolute after:-bottom-1 after:left-1/2 after:transform after:-translate-x-1/2 after:w-1 after:h-1 after:bg-blue-400 after:rounded-full"
                 ),
                 day_outside: cn(
                     "day-outside text-slate-500/60 opacity-40",
@@ -53,8 +53,8 @@ const Calendar = forwardRef(({ className, classNames, showOutsideDays = true, ..
                 ),
                 day_disabled: "text-slate-600/40 opacity-30 cursor-not-allowed hover:scale-100 hover:bg-transparent hover:text-slate-600/40",
                 day_range_middle: cn(
-                    "aria-selected:bg-gradient-to-r aria-selected:from-[#A8E6CF]/20 aria-selected:to-[#A8E6CF]/20",
-                    "aria-selected:text-white aria-selected:border-[#A8E6CF]/20"
+                    "aria-selected:bg-gradient-to-r aria-selected:from-blue-600/20 aria-selected:to-blue-600/20",
+                    "aria-selected:text-white aria-selected:border-blue-600/20"
                 ),
                 day_hidden: "invisible",
                 ...classNames,
