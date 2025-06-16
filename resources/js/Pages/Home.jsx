@@ -355,100 +355,31 @@ const FitnessIcon = ({ icon, label, description }) => {
 };
 
 // FeatureCard component for program sections with enhanced animations
-const FeatureCard = ({ title, description, image, reverse = false, animate = true }) => {
-    const cardRef = useRef(null);
-    const [isVisible, setIsVisible] = useState(false);
-    
-    useEffect(() => {
-        if (!animate) {
-            setIsVisible(true);
-            return;
-        }
-        
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                    observer.unobserve(entry.target);
-                }
-            },
-            { threshold: 0.2 }
-        );
-        
-        if (cardRef.current) {
-            observer.observe(cardRef.current);
-        }
-        
-        return () => {
-            if (cardRef.current) {
-                observer.unobserve(cardRef.current);
-            }
-        };
-    }, [animate]);
-    
+const FeatureCard = ({ title, description, image, reverse = false, animate = true, slug }) => {
     return (
-        <div 
-            ref={cardRef} 
-            className={`flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} items-center mb-24 last:mb-0 overflow-hidden`}
+        <motion.div
+            initial={animate ? { opacity: 0, y: 50 } : false}
+            whileInView={animate ? { opacity: 1, y: 0 } : false}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className={`flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} gap-8 items-center`}
         >
-            <motion.div 
-                className={`w-full md:w-1/2 transform rounded-xl overflow-hidden`}
-                initial={{ x: reverse ? 40 : -40, opacity: 0 }}
-                animate={isVisible ? { x: 0, opacity: 1 } : {}}
-                transition={{ 
-                    duration: 1.2, 
-                    ease: [0.16, 1, 0.3, 1],
-                    type: "spring", 
-                    stiffness: 150
-                }}
-                whileHover={{ scale: 1.03 }}
-            >
-                <div className="relative overflow-hidden rounded-lg shadow-xl">
+            <div className="md:w-1/2">
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                     <img 
                         src={image} 
-                        alt={title} 
-                        className="w-full h-auto object-cover"
-                        style={{ maxHeight: '450px' }}
+                        alt={title}
+                        className="w-full h-[400px] object-cover transform hover:scale-105 transition-transform duration-500"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 </div>
-            </motion.div>
-            <motion.div 
-                className="w-full md:w-1/2 md:px-12 py-8"
-                initial={{ y: 40, opacity: 0 }}
-                animate={isVisible ? { y: 0, opacity: 1 } : {}}
-                transition={{ 
-                    duration: 0.9, 
-                    delay: 0.3,
-                    ease: [0.16, 1, 0.3, 1]
-                }}
-            >
-                <h3 
-                    className="text-2xl md:text-3xl font-bold mb-6 tracking-tight text-gray-800"
-                    style={{ fontFamily: "'Montserrat', sans-serif" }}
-                >
-                    {title}
-                </h3>
-                <p 
-                    className="text-gray-600 mb-8 font-light leading-relaxed"
-                    style={{ fontFamily: "'Raleway', sans-serif" }}
-                >
-                    {description}
-                </p>
-                <motion.button 
-                    className="px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg shadow-lg relative overflow-hidden group"
-                    initial={{ 
-                        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)" 
-                    }}
-                    whileHover={{ 
-                        scale: 1.05,
-                        boxShadow: "0 20px 25px -5px rgba(249, 115, 22, 0.2), 0 10px 10px -5px rgba(249, 115, 22, 0.1)",
-                        transition: {
-                            type: "spring",
-                            stiffness: 400,
-                            damping: 10
-                        }
-                    }}
-                    whileTap={{ scale: 0.95 }}
+            </div>
+            <div className="md:w-1/2">
+                <h3 className="text-3xl font-bold mb-4">{title}</h3>
+                <p className="text-gray-300 mb-6">{description}</p>
+                <Link
+                    href={route('program.details', { slug })}
+                    className="group relative inline-flex items-center justify-center px-8 py-3 font-medium tracking-wide text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-full overflow-hidden transition-all duration-300 hover:from-orange-600 hover:to-red-600"
                 >
                     <motion.span 
                         className="absolute inset-0 bg-gradient-to-r from-orange-600 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -467,9 +398,9 @@ const FeatureCard = ({ title, description, image, reverse = false, animate = tru
                             →
                         </motion.span>
                     </span>
-                </motion.button>
-            </motion.div>
-        </div>
+                </Link>
+            </div>
+        </motion.div>
     );
 };
 
@@ -988,18 +919,21 @@ export default function Home({ comments: initialComments, auth, activeSubscripti
         {
             title: "FORCE & CONDITIONNEMENT",
             description: "Développez vos muscles, augmentez votre force et améliorez votre condition physique globale avec notre programme complet de force et de conditionnement. Nos entraîneurs experts vous guideront à travers un régime personnalisé conçu pour répondre à vos objectifs spécifiques, que vous soyez débutant ou athlète avancé.",
-            image: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?ixlib=rb-4.0.3&auto=format&fit=crop&w=750&q=80"
+            image: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?ixlib=rb-4.0.3&auto=format&fit=crop&w=750&q=80",
+            slug: "force-conditionnement"
         },
         {
             title: "CARDIO & HIIT",
             description: "Maximisez la perte de graisse et la santé cardiovasculaire grâce à notre entraînement par intervalles à haute intensité et nos programmes cardio variés. Vivez des séances d'entraînement dynamiques qui maintiennent votre cœur en action et brûlent des calories longtemps après la fin de votre séance.",
             image: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?ixlib=rb-4.0.3&auto=format&fit=crop&w=750&q=80",
+            slug: "cardio-hiit",
             reverse: true
         },
         {
             title: "YOGA & MOBILITÉ",
             description: "Améliorez votre flexibilité, votre équilibre et votre bien-être mental grâce à nos programmes de yoga et de mobilité. Parfaites pour les jours de récupération ou comme pratique autonome, ces séances favorisent la longévité dans votre parcours de fitness tout en réduisant les risques de blessures.",
-            image: "/storage/join_us.jpg"
+            image: "/storage/join_us.jpg",
+            slug: "yoga-mobilite"
         }
     ];
     
@@ -1364,7 +1298,7 @@ export default function Home({ comments: initialComments, auth, activeSubscripti
                                             }}
                                             className="text-xl text-gray-200 mt-12 mb-10"
                                         >
-                                            Rejoignez l'élite du fitness à Paris et atteignez vos objectifs
+                                            Rejoignez l'élite du fitness au Maroc et atteignez vos objectifs
                                         </motion.p>
                                         
                                         <motion.div
@@ -1484,6 +1418,7 @@ export default function Home({ comments: initialComments, auth, activeSubscripti
                                             image={program.image}
                                             reverse={program.reverse}
                                             animate={false}
+                                            slug={program.slug}
                                         />
                                     </div>
                                 </div>

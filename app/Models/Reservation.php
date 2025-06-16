@@ -13,6 +13,7 @@ class Reservation extends Model
         'user_id',
         'date',
         'status',
+        'notes'
     ];
 
     protected $casts = [
@@ -23,4 +24,4 @@ class Reservation extends Model
     {
         return $this->belongsTo(User::class);
     }
-} 
+}

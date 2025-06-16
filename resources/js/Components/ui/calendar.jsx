@@ -7,35 +7,55 @@ const Calendar = forwardRef(({ className, classNames, showOutsideDays = true, ..
     return (
         <DayPicker
             showOutsideDays={showOutsideDays}
-            className={cn("p-3", className)}
+            className={cn("p-6 bg-slate-800 rounded-2xl shadow-2xl border border-slate-700/30", className)}
             classNames={{
-                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                month: "space-y-4",
-                caption: "flex justify-center pt-1 relative items-center",
-                caption_label: "text-sm font-medium text-white",
-                nav: "space-x-1 flex items-center",
+                months: "flex flex-col sm:flex-row space-y-6 sm:space-x-6 sm:space-y-0",
+                month: "space-y-6",
+                caption: "flex justify-center pt-1 items-center mb-4",
+                caption_label: "text-xl font-bold text-white tracking-wide",
+                nav: "flex items-center justify-center gap-6 mb-4",
                 nav_button: cn(
-                    "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-orange-500 hover:text-orange-400"
+                    "h-9 w-9 bg-slate-700/50 hover:bg-slate-600/50 p-2 rounded-xl opacity-70 hover:opacity-100 text-slate-300 hover:text-[#A8E6CF] transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF]/50"
                 ),
-                nav_button_previous: "absolute left-1",
-                nav_button_next: "absolute right-1",
-                table: "w-full border-collapse space-y-1",
-                head_row: "flex",
-                head_cell: "text-gray-400 rounded-md w-9 font-normal text-[0.8rem]",
-                row: "flex w-full mt-2",
-                cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-gray-700/50 [&:has([aria-selected])]:bg-gray-700 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                nav_button_previous: "",
+                nav_button_next: "",
+                table: "w-full border-collapse",
+                head_row: "flex mb-3",
+                head_cell: "text-slate-400 rounded-lg w-12 h-10 font-medium text-sm flex items-center justify-center tracking-wider uppercase",
+                row: "flex w-full mb-1",
+                cell: cn(
+                    "h-12 w-12 text-center text-sm p-0 relative m-0.5",
+                    "[&:has([aria-selected].day-range-end)]:rounded-r-xl",
+                    "[&:has([aria-selected].day-outside)]:bg-slate-700/30",
+                    "[&:has([aria-selected])]:bg-slate-700/50",
+                    "first:[&:has([aria-selected])]:rounded-l-xl",
+                    "last:[&:has([aria-selected])]:rounded-r-xl",
+                    "focus-within:relative focus-within:z-20"
+                ),
                 day: cn(
-                    "h-9 w-9 p-0 font-normal text-gray-200 aria-selected:opacity-100"
+                    "h-12 w-12 p-0 font-medium text-slate-200 rounded-xl transition-all duration-200 hover:scale-105 hover:bg-[#A8E6CF]/10 hover:text-[#A8E6CF] aria-selected:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#A8E6CF]/50 relative"
                 ),
                 day_range_end: "day-range-end",
-                day_selected:
-                    "bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 focus:bg-gradient-to-r focus:from-orange-500 focus:to-red-500",
-                day_today: "bg-gray-700 text-white border border-orange-500",
-                day_outside:
-                    "day-outside text-gray-500 opacity-50 aria-selected:bg-gray-700/50 aria-selected:text-gray-400 aria-selected:opacity-30",
-                day_disabled: "text-gray-600 opacity-40",
-                day_range_middle:
-                    "aria-selected:bg-gray-700 aria-selected:text-white",
+                day_selected: cn(
+                    "bg-[#A8E6CF] text-slate-900 font-bold shadow-lg shadow-[#A8E6CF]/25",
+                    "hover:bg-[#9BDCC3] focus:bg-[#A8E6CF]",
+                    "before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/20 before:to-transparent before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-200 before:rounded-xl"
+                ),
+                day_today: cn(
+                    "bg-slate-700/80 text-white font-semibold border-2 border-[#A8E6CF]/60 shadow-md shadow-[#A8E6CF]/20",
+                    "hover:bg-slate-600/80 hover:border-[#A8E6CF]/80 hover:shadow-[#A8E6CF]/30",
+                    "after:absolute after:-bottom-1 after:left-1/2 after:transform after:-translate-x-1/2 after:w-1 after:h-1 after:bg-[#A8E6CF] after:rounded-full"
+                ),
+                day_outside: cn(
+                    "day-outside text-slate-500/60 opacity-40",
+                    "aria-selected:bg-slate-700/30 aria-selected:text-slate-400 aria-selected:opacity-50",
+                    "hover:opacity-60 hover:text-slate-400 hover:bg-slate-700/20"
+                ),
+                day_disabled: "text-slate-600/40 opacity-30 cursor-not-allowed hover:scale-100 hover:bg-transparent hover:text-slate-600/40",
+                day_range_middle: cn(
+                    "aria-selected:bg-gradient-to-r aria-selected:from-[#A8E6CF]/20 aria-selected:to-[#A8E6CF]/20",
+                    "aria-selected:text-white aria-selected:border-[#A8E6CF]/20"
+                ),
                 day_hidden: "invisible",
                 ...classNames,
             }}
@@ -46,10 +66,10 @@ const Calendar = forwardRef(({ className, classNames, showOutsideDays = true, ..
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="2"
+                        strokeWidth="2.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="h-4 w-4"
+                        className="h-5 w-5"
                         {...props}
                     >
                         <path d="m15 18-6-6 6-6" />
@@ -61,20 +81,22 @@ const Calendar = forwardRef(({ className, classNames, showOutsideDays = true, ..
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="2"
+                        strokeWidth="2.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="h-4 w-4"
+                        className="h-5 w-5"
                         {...props}
                     >
                         <path d="m9 18 6-6-6-6" />
                     </svg>
                 ),
             }}
+            ref={ref}
             {...props}
         />
     );
 });
+
 Calendar.displayName = "Calendar";
 
-export { Calendar }; 
+export { Calendar };

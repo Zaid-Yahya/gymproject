@@ -13,6 +13,10 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminSubscriptionController;
+use App\Http\Controllers\Admin\AdminReservationController;
 
 Route::get('/', function () {
     // If an authenticated user is an admin, redirect them to the admin dashboard
@@ -75,6 +79,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/statistics', [AdminController::class, 'renderStatisticsPage'])->name('statistics');
         Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
         Route::post('/profile', [AdminController::class, 'updateProfile'])->name('profile.update');
+        Route::get('/reservations', [AdminReservationController::class, 'index'])->name('reservations');
+        Route::patch('/reservations/{id}/update-status', [AdminReservationController::class, 'updateStatus'])
+            ->name('reservations.update-status');
     });
 
     // New API route for statistics data
@@ -117,5 +124,25 @@ Route::delete('/discounts/{discount}', [DiscountController::class, 'destroy'])->
 Route::get('/bmi-calculator', function () {
     return Inertia::render('BmiCalculator');
 })->name('bmi.calculator');
+
+// Add new route for program details
+Route::get('/program/{slug}', function ($slug) {
+    return Inertia::render('ProgramDetails', [
+        'slug' => $slug
+    ]);
+})->name('program.details');
+
+// Add new routes for BMI, Plan, and Reservation
+Route::get('/bmi', function () {
+    return Inertia::render('Bmi');
+})->name('bmi');
+
+Route::get('/plan', function () {
+    return Inertia::render('Plan');
+})->name('plan');
+
+Route::get('/reservation', function () {
+    return Inertia::render('Reservation');
+})->name('reservation');
 
 require __DIR__.'/auth.php';

@@ -79,44 +79,28 @@ export default function Navbar({ activeSection = 'hero' }) {
                             ACCUEIL
                         </Link>
                         <Link 
-                            href={route('home') + '#programs'}
+                            href={route('bmi.calculator')}
                             className={`text-sm font-medium transition-all duration-300 ${
-                                activeSection === 'programs' ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
+                                route().current('bmi.calculator') ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
                             }`}
                         >
-                            PROGRAMMES
+                            BMI
                         </Link>
                         <Link 
-                            href={route('home') + '#gallery'}
+                            href={route('plan')}
                             className={`text-sm font-medium transition-all duration-300 ${
-                                activeSection === 'gallery' ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
+                                route().current('plan') ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
                             }`}
                         >
-                            GALERIE
+                            PLAN
                         </Link>
                         <Link 
-                            href={route('home') + '#trainers'}
+                            href={route('reservations.create')}
                             className={`text-sm font-medium transition-all duration-300 ${
-                                activeSection === 'trainers' ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
+                                route().current('reservations.create') ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
                             }`}
                         >
-                            ENTRAINEURS
-                        </Link>
-                        <Link 
-                            href={route('home') + '#testimonials'}
-                            className={`text-sm font-medium transition-all duration-300 ${
-                                activeSection === 'testimonials' ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
-                            }`}
-                        >
-                            TÉMOIGNAGES
-                        </Link>
-                        <Link 
-                            href={route('home') + '#membership'}
-                            className={`text-sm font-medium transition-all duration-300 ${
-                                activeSection === 'membership' ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
-                            }`}
-                        >
-                            ABONNEMENTS
+                            RESERVATION
                         </Link>
                         {auth?.user?.is_admin && (
                             <>
@@ -244,44 +228,28 @@ export default function Navbar({ activeSection = 'hero' }) {
                             ACCUEIL
                         </Link>
                         <Link 
-                            href={route('home') + '#programs'}
+                            href={route('bmi.calculator')}
                             className={`text-sm font-medium py-2 px-4 transition-all duration-300 ${
-                                activeSection === 'programs' ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
+                                route().current('bmi.calculator') ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
                             }`}
                         >
-                            PROGRAMMES
+                            BMI
                         </Link>
                         <Link 
-                            href={route('home') + '#gallery'}
+                            href={route('plan')}
                             className={`text-sm font-medium py-2 px-4 transition-all duration-300 ${
-                                activeSection === 'gallery' ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
+                                route().current('plan') ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
                             }`}
                         >
-                            GALERIE
+                            PLAN
                         </Link>
                         <Link 
-                            href={route('home') + '#trainers'}
+                            href={route('reservations.create')}
                             className={`text-sm font-medium py-2 px-4 transition-all duration-300 ${
-                                activeSection === 'trainers' ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
+                                route().current('reservations.create') ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
                             }`}
                         >
-                            ENTRAINEURS
-                        </Link>
-                        <Link 
-                            href={route('home') + '#testimonials'}
-                            className={`text-sm font-medium py-2 px-4 transition-all duration-300 ${
-                                activeSection === 'testimonials' ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
-                            }`}
-                        >
-                            TÉMOIGNAGES
-                        </Link>
-                        <Link 
-                            href={route('home') + '#membership'}
-                            className={`text-sm font-medium py-2 px-4 transition-all duration-300 ${
-                                activeSection === 'membership' ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'
-                            }`}
-                        >
-                            ABONNEMENTS
+                            RESERVATION
                         </Link>
                         {auth?.user?.is_admin && (
                             <>
