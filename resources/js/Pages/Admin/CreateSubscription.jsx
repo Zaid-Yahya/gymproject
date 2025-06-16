@@ -22,11 +22,7 @@ export default function CreateSubscription({ users, discounts }) {
         start_date: format(new Date(), 'yyyy-MM-dd'),
         end_date: format(new Date(new Date().setMonth(new Date().getMonth() + 1)), 'yyyy-MM-dd'),
         is_upgrade: false,
-        // New user fields
-        new_user: {
-            name: '',
-            email: '',
-        }
+        new_user: null
     });
 
     const [selectedDiscount, setSelectedDiscount] = useState(null);
@@ -80,6 +76,27 @@ export default function CreateSubscription({ users, discounts }) {
 
     // Update prices when plan or period changes
     useEffect(() => {
+        // Update end date based on period
+        const startDate = new Date(data.start_date);
+        let endDate = new Date(startDate);
+
+        switch (data.period) {
+            case 'monthly':
+                endDate.setMonth(endDate.getMonth() + 1);
+                break;
+            case 'quarterly':
+                endDate.setMonth(endDate.getMonth() + 3);
+                break;
+            case 'yearly':
+                endDate.setFullYear(endDate.getFullYear() + 1);
+                break;
+        }
+
+        setData(data => ({
+            ...data,
+            end_date: format(endDate, 'yyyy-MM-dd')
+        }));
+
         if (activeSubscription) {
             // Calculate upgrade price
             const currentPlanTier = planTiers[activeSubscription.plan_name];
@@ -120,7 +137,54 @@ export default function CreateSubscription({ users, discounts }) {
                 is_upgrade: false,
             }));
         }
-    }, [data.plan_name, data.period, selectedDiscount, isNewUser, activeSubscription]);
+    }, [data.plan_name, data.period, data.start_date, selectedDiscount, isNewUser, activeSubscription]);
+
+    // Add new useEffect for end date updates
+    useEffect(() => {
+        const startDate = new Date(data.start_date);
+        let endDate = new Date(startDate);
+
+        switch (data.period) {
+            case 'monthly':
+                endDate.setMonth(endDate.getMonth() + 1);
+                break;
+            case 'quarterly':
+                endDate.setMonth(endDate.getMonth() + 3);
+                break;
+            case 'yearly':
+                endDate.setFullYear(endDate.getFullYear() + 1);
+                break;
+        }
+
+        setData(data => ({
+            ...data,
+            end_date: format(endDate, 'yyyy-MM-dd')
+        }));
+    }, [data.period, data.start_date]);
+
+    // Add handler for start date changes
+    const handleStartDateChange = (e) => {
+        const newStartDate = e.target.value;
+        setData('start_date', newStartDate);
+        
+        // Update end date based on new start date and current period
+        const startDate = new Date(newStartDate);
+        let endDate = new Date(startDate);
+
+        switch (data.period) {
+            case 'monthly':
+                endDate.setMonth(endDate.getMonth() + 1);
+                break;
+            case 'quarterly':
+                endDate.setMonth(endDate.getMonth() + 3);
+                break;
+            case 'yearly':
+                endDate.setFullYear(endDate.getFullYear() + 1);
+                break;
+        }
+
+        setData('end_date', format(endDate, 'yyyy-MM-dd'));
+    };
 
     // Calculate discounted price
     const calculateDiscountedPrice = (originalPrice, discount) => {
@@ -135,7 +199,58 @@ export default function CreateSubscription({ users, discounts }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route('admin.subscriptions.store'), {
+
+        // Validate required fields
+        if (!selectedUser && !isNewUser) {
+            alert('Please select a user or create a new one');
+            return;
+        }
+
+        if (!data.plan_name || !data.period || !data.start_date || !data.end_date) {
+            alert('Please fill in all required fields');
+            return;
+        }
+
+        // Create base form data
+        let formData = {
+            plan_name: data.plan_name,
+            period: data.period,
+            original_price: data.original_price,
+            price: data.price,
+            start_date: format(new Date(data.start_date), 'yyyy-MM-dd'),
+            end_date: format(new Date(data.end_date), 'yyyy-MM-dd'),
+            is_upgrade: data.is_upgrade || false
+        };
+
+        // Add user_id or new_user based on selection
+        if (selectedUser) {
+            formData.user_id = selectedUser.id;
+        } else if (isNewUser) {
+            if (!data.new_user?.name || !data.new_user?.email) {
+                alert('Please fill in all new user details');
+                return;
+            }
+            formData.new_user = {
+                name: data.new_user.name,
+                email: data.new_user.email
+            };
+        }
+
+        // Add discount_id only if it exists and is not empty
+        if (data.discount_id && data.discount_id !== '') {
+            formData.discount_id = data.discount_id;
+        }
+
+        // Remove any undefined, null, or empty values
+        Object.keys(formData).forEach(key => {
+            if (formData[key] === undefined || formData[key] === null || formData[key] === '') {
+                delete formData[key];
+            }
+        });
+
+        console.log('Sending form data:', formData);
+
+        post(route('admin.subscriptions.store'), formData, {
             onSuccess: () => {
                 reset();
                 setSelectedDiscount(null);
@@ -146,6 +261,11 @@ export default function CreateSubscription({ users, discounts }) {
             },
             onError: (errors) => {
                 console.error('Form submission errors:', errors);
+                if (errors.new_user) {
+                    alert('Please fill in all new user details correctly');
+                } else {
+                    alert('Failed to create subscription. Please check the console for details.');
+                }
             }
         });
     };
@@ -158,30 +278,24 @@ export default function CreateSubscription({ users, discounts }) {
 
     const handleUserSelect = (user) => {
         setSelectedUser(user);
-        setData('user_id', user.id);
-        setSearchQuery(user.name);
-        setSearchResults([]);
         setIsNewUser(false);
-
-        // Check for active subscription
-        const activeSub = user.subscriptions?.[0];
-        if (activeSub) {
-            setActiveSubscription(activeSub);
-            setData('plan_name', activeSub.plan_name);
-            setData('period', activeSub.period);
-        } else {
-            setActiveSubscription(null);
-            setData('plan_name', 'Basic');
-            setData('period', 'monthly');
-        }
+        setShowNewUserForm(false);
+        setData(data => ({
+            ...data,
+            user_id: user.id,
+            new_user: null
+        }));
     };
 
     const handleNewUser = () => {
-        setShowNewUserForm(true);
         setSelectedUser(null);
-        setData('user_id', '');
         setIsNewUser(true);
-        setActiveSubscription(null);
+        setShowNewUserForm(true);
+        setData(data => ({
+            ...data,
+            user_id: '',
+            new_user: { name: '', email: '' }
+        }));
     };
 
     return (
@@ -285,7 +399,7 @@ export default function CreateSubscription({ users, discounts }) {
                                                 <label className="block text-sm font-medium text-gray-700">Name</label>
                                                 <input
                                                     type="text"
-                                                    value={data.new_user.name}
+                                                    value={data.new_user?.name}
                                                     onChange={e => setData('new_user', { ...data.new_user, name: e.target.value })}
                                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                     required
@@ -298,7 +412,7 @@ export default function CreateSubscription({ users, discounts }) {
                                                 <label className="block text-sm font-medium text-gray-700">Email</label>
                                                 <input
                                                     type="email"
-                                                    value={data.new_user.email}
+                                                    value={data.new_user?.email}
                                                     onChange={e => setData('new_user', { ...data.new_user, email: e.target.value })}
                                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                     required
@@ -308,42 +422,23 @@ export default function CreateSubscription({ users, discounts }) {
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="flex justify-end">
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setShowNewUserForm(false);
-                                                    setIsNewUser(false);
-                                                    reset('new_user');
-                                                }}
-                                                className="mr-2 px-4 py-2 text-sm text-gray-700 hover:text-gray-900"
-                                            >
-                                                Cancel
-                                            </button>
-                                        </div>
                                     </div>
                                 )}
 
                                 {/* Subscription Details */}
-                                {!showNewUserForm && (
-                                    <div className="space-y-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700">Plan</label>
                                             <select
                                                 value={data.plan_name}
                                                 onChange={e => setData('plan_name', e.target.value)}
                                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                                disabled={activeSubscription && planTiers[e.target.value] <= planTiers[activeSubscription.plan_name]}
+                                            required
                                             >
                                                 <option value="Basic">Basic</option>
                                                 <option value="Premium">Premium</option>
                                                 <option value="Elite">Elite</option>
                                             </select>
-                                            {activeSubscription && planTiers[data.plan_name] <= planTiers[activeSubscription.plan_name] && (
-                                                <p className="mt-1 text-sm text-red-600">
-                                                    You can only upgrade to a higher tier plan
-                                                </p>
-                                            )}
                                         </div>
 
                                         <div>
@@ -352,12 +447,35 @@ export default function CreateSubscription({ users, discounts }) {
                                                 value={data.period}
                                                 onChange={e => setData('period', e.target.value)}
                                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            required
                                             >
                                                 <option value="monthly">Monthly</option>
                                                 <option value="quarterly">Quarterly</option>
                                                 <option value="yearly">Yearly</option>
                                             </select>
                                         </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                                        <input
+                                            type="date"
+                                            value={data.start_date}
+                                            onChange={handleStartDateChange}
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">End Date</label>
+                                        <input
+                                            type="date"
+                                            value={data.end_date}
+                                            readOnly
+                                            className="mt-1 block w-full rounded-md border-gray-300 bg-gray-50 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            required
+                                        />
+                                    </div>
 
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700">Discount</label>
@@ -373,23 +491,21 @@ export default function CreateSubscription({ users, discounts }) {
                                                     </option>
                                                 ))}
                                             </select>
+                                    </div>
                                         </div>
 
+                                {/* Price Summary */}
                                         <div className="bg-gray-50 p-4 rounded-md">
-                                            <h4 className="text-lg font-medium text-gray-900 mb-2">Price Summary</h4>
+                                    <h3 className="text-lg font-medium text-gray-900 mb-4">Price Summary</h3>
                                             <div className="space-y-2">
                                                 <div className="flex justify-between">
                                                     <span>Original Price:</span>
                                                     <span>${data.original_price}</span>
                                                 </div>
-                                                {selectedDiscount && (
+                                        {data.discount_id && (
                                                     <div className="flex justify-between text-green-600">
-                                                        <span>Discount:</span>
-                                                        <span>
-                                                            {selectedDiscount.type === 'percentage' 
-                                                                ? `-${selectedDiscount.value}%`
-                                                                : `-$${selectedDiscount.value}`}
-                                                        </span>
+                                                <span>Discount Applied:</span>
+                                                <span>-${(data.original_price - data.price).toFixed(2)}</span>
                                                     </div>
                                                 )}
                                                 {isNewUser && (
@@ -398,28 +514,20 @@ export default function CreateSubscription({ users, discounts }) {
                                                         <span>${INSURANCE_FEE}</span>
                                                     </div>
                                                 )}
-                                                {activeSubscription && (
-                                                    <div className="flex justify-between text-blue-600">
-                                                        <span>Prorated Upgrade:</span>
-                                                        <span>Based on remaining days</span>
-                                                    </div>
-                                                )}
                                                 <div className="flex justify-between font-bold border-t pt-2 mt-2">
-                                                    <span>Final Price:</span>
+                                            <span>Total Price:</span>
                                                     <span>${data.price}</span>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
-                                )}
+                                </div>
 
                                 <div className="flex justify-end">
                                     <button
                                         type="submit"
-                                        disabled={processing || (activeSubscription && planTiers[data.plan_name] <= planTiers[activeSubscription.plan_name])}
-                                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+                                        disabled={processing}
+                                        className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
                                     >
-                                        {processing ? 'Processing...' : activeSubscription ? 'Upgrade Subscription' : 'Create Subscription'}
+                                        {processing ? 'Creating...' : 'Create Subscription'}
                                     </button>
                                 </div>
                             </form>

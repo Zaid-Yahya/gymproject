@@ -3,6 +3,9 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { format, differenceInDays } from 'date-fns';
 import Modal from '@/Components/Modal'; // Assuming you have a Modal component in Components
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 export default function Subscriptions({ subscriptions }) {
   const [filteredSubscriptions, setFilteredSubscriptions] = useState(subscriptions);
@@ -124,6 +127,82 @@ export default function Subscriptions({ subscriptions }) {
     }
   };
 
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(16);
+    doc.text('Subscriptions Report', 14, 15);
+    
+    // Add date
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 22);
+
+    // Prepare table data
+    const tableData = filteredSubscriptions.map(sub => [
+      sub.id,
+      sub.user?.name || 'N/A',
+      sub.user?.email || 'N/A',
+      sub.subscription?.name || 'N/A',
+      sub.status,
+      formatDate(sub.start_date),
+      formatDate(sub.end_date)
+    ]);
+
+    // Add table using autoTable
+    autoTable(doc, {
+      head: [['ID', 'Customer', 'Email', 'Plan', 'Status', 'Start Date', 'End Date']],
+      body: tableData,
+      startY: 30,
+      theme: 'grid',
+      styles: { 
+        fontSize: 8,
+        cellPadding: 2,
+        overflow: 'linebreak'
+      },
+      headStyles: { 
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 9,
+        fontStyle: 'bold'
+      },
+      columnStyles: {
+        0: { cellWidth: 20 }, // ID
+        1: { cellWidth: 40 }, // Customer
+        2: { cellWidth: 50 }, // Email
+        3: { cellWidth: 30 }, // Plan
+        4: { cellWidth: 25 }, // Status
+        5: { cellWidth: 30 }, // Start Date
+        6: { cellWidth: 30 }  // End Date
+      },
+      margin: { top: 30 }
+    });
+
+    // Save the PDF
+    doc.save('subscriptions-report.pdf');
+  };
+
+  const exportToExcel = () => {
+    // Prepare data for Excel
+    const data = filteredSubscriptions.map(sub => ({
+      'ID': sub.id,
+      'Customer': sub.user?.name || 'N/A',
+      'Email': sub.user?.email || 'N/A',
+      'Plan': sub.plan_name || 'N/A',
+      'Status': sub.status,
+      'Start Date': formatDate(sub.start_date),
+      'End Date': formatDate(sub.end_date)
+    }));
+
+    // Create worksheet
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Subscriptions');
+
+    // Save the Excel file
+    XLSX.writeFile(wb, 'subscriptions-report.xlsx');
+  };
+
   return (
     <AdminLayout>
       <Head title="Subscriptions Management" />
@@ -132,15 +211,35 @@ export default function Subscriptions({ subscriptions }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-semibold text-gray-900">Subscriptions Management</h1>
-            <Link
-              href="/admin/subscriptions/create"
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-orange-400 to-red-500 hover:from-orange-500 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-            >
-              <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Create Subscription
-            </Link>
+            <div className="flex space-x-3">
+              <button
+                onClick={exportToPDF}
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                Export PDF
+              </button>
+              <button
+                onClick={exportToExcel}
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export Excel
+              </button>
+              <Link
+                href="/admin/subscriptions/create"
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-orange-400 to-red-500 hover:from-orange-500 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+              >
+                <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Create Subscription
+              </Link>
+            </div>
           </div>
           
           {/* Stats Cards */}
@@ -278,6 +377,9 @@ export default function Subscriptions({ subscriptions }) {
           <div className="mt-4 flex flex-col">
             <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg font-semibold">All Subscriptions</h3>
+                </div>
                 <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
@@ -285,7 +387,7 @@ export default function Subscriptions({ subscriptions }) {
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Date</th>
@@ -295,7 +397,7 @@ export default function Subscriptions({ subscriptions }) {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {filteredSubscriptions.length > 0 ? (
                         filteredSubscriptions.map((subscription) => (
-                          <tr key={subscription.id}>
+                          <tr key={subscription.id} className="hover:bg-gray-50 transition-colors duration-150 ease-in-out">
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{subscription.id}</td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
@@ -318,11 +420,29 @@ export default function Subscriptions({ subscriptions }) {
                                 </div>
                               </div>
                             </td>
+                           
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              <span className={getPeriodBadge(subscription.period)}>{subscription.plan_name}</span>
-                              <span className="ml-2 text-xs text-gray-400">({subscription.tier ? `Tier ${subscription.tier}` : 'N/A'})</span>
+                              <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                subscription.plan_name === 'Basic' 
+                                  ? 'bg-blue-100 text-blue-800 border border-blue-200' 
+                                  : subscription.plan_name === 'Premium'
+                                  ? 'bg-purple-100 text-purple-800 border border-purple-200'
+                                  : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                              }`}>
+                                {subscription.plan_name}
+                              </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${parseFloat(subscription.price).toFixed(2)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                subscription.period === 'monthly' 
+                                  ? 'bg-green-100 text-green-800 border border-green-200' 
+                                  : subscription.period === 'quarterly'
+                                  ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                                  : 'bg-purple-100 text-purple-800 border border-purple-200'
+                              }`}>
+                                {subscription.period.charAt(0).toUpperCase() + subscription.period.slice(1)}
+                              </span>
+                            </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               <span className={getStatusBadge(subscription.status)}>{subscription.status}</span>
                             </td>

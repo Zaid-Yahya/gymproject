@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, Head } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import { FileText } from 'lucide-react';
 
 export default function Users({ users }) {
     const [searchTerm, setSearchTerm] = useState('');

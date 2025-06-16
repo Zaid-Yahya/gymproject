@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Mail\NewUserCredentials;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
 {
@@ -400,27 +401,42 @@ class AdminController extends Controller
 
     public function storeSubscription(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required_without:new_user',
-            'new_user' => 'required_without:user_id|array',
-            'new_user.name' => 'required_with:new_user|string|max:255',
-            'new_user.email' => 'required_with:new_user|email|max:255|unique:users,email',
-            'plan_name' => 'required|string|in:Basic,Premium,Elite',
-            'period' => 'required|string|in:monthly,quarterly,yearly',
-            'price' => 'required|numeric|min:0',
-            'original_price' => 'required|numeric|min:0',
-            'discount_id' => 'nullable|exists:discounts,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-        ]);
-
         try {
+            \Log::info('Subscription creation request:', $request->all());
+
+            // Base validation rules
+            $rules = [
+                'plan_name' => 'required|string|in:Basic,Premium,Elite',
+                'period' => 'required|string|in:monthly,quarterly,yearly',
+                'price' => 'required|numeric|min:0',
+                'original_price' => 'required|numeric|min:0',
+                'discount_id' => 'nullable|exists:discounts,id',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after:start_date',
+            ];
+
+            // Check if this is a new user or existing user case
+            if ($request->filled('user_id')) {
+                // Existing user case
+                $rules['user_id'] = 'required|exists:users,id';
+            } else {
+                // New user case
+                $rules['new_user'] = 'required|array';
+                $rules['new_user.name'] = 'required|string|max:255';
+                $rules['new_user.email'] = 'required|email|max:255|unique:users,email';
+            }
+
+            $request->validate($rules);
+
             DB::beginTransaction();
 
-            // Handle new user creation if needed
-            $userId = $request->user_id;
-            if ($request->has('new_user')) {
-                // Generate a random numeric password (8 digits)
+            // Handle user ID assignment
+            $userId = null;
+            if ($request->filled('user_id')) {
+                // Use existing user
+                $userId = $request->user_id;
+            } else {
+                // Create new user
                 $randomPassword = str_pad(random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
                 
                 $user = User::create([
@@ -428,11 +444,18 @@ class AdminController extends Controller
                     'email' => $request->new_user['email'],
                     'password' => Hash::make($randomPassword),
                     'role' => 'user',
+                    'source' => 'admin_created',
                 ]);
                 $userId = $user->id;
 
                 // Send credentials email
                 Mail::to($user->email)->send(new NewUserCredentials($user, $randomPassword));
+            }
+
+            // Verify user exists
+            $user = User::find($userId);
+            if (!$user) {
+                throw new \Exception("User not found with ID: {$userId}");
             }
 
             // Get the tier level for the plan
@@ -453,8 +476,10 @@ class AdminController extends Controller
                 'is_upgrade' => false,
             ]);
 
+            \Log::info('Subscription created:', ['subscription' => $subscription->toArray()]);
+
             // Create a payment record for the subscription
-            Payment::create([
+            $payment = Payment::create([
                 'user_id' => $userId,
                 'subscription_id' => $subscription->id,
                 'amount' => $request->price,
@@ -467,13 +492,35 @@ class AdminController extends Controller
                 ],
             ]);
 
+            \Log::info('Payment created:', ['payment' => $payment->toArray()]);
+
+            // Update user's subscription status
+            $user->has_subscription = true;
+            $user->save();
+
+            \Log::info('User updated:', ['user' => $user->toArray()]);
+
             DB::commit();
             
             return redirect()->route('admin.subscriptions')
                 ->with('success', 'Subscription created successfully.');
                 
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            \Log::error('Validation failed: ' . json_encode($e->errors()));
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['errors' => $e->errors()], 422);
+            }
+            throw $e;
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Failed to create subscription: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request_data' => $request->all()
+            ]);
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['error' => 'Failed to create subscription: ' . $e->getMessage()], 500);
+            }
             return back()
                 ->withInput()
                 ->withErrors(['error' => 'Failed to create subscription: ' . $e->getMessage()]);
